@@ -45,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             username = jwtUtil.extractUsername(token);
-        } catch (Exception _) {
+        } catch (Exception e) {
             // Token is invalid, expired, or malformed
             filterChain.doFilter(request, response);
             return;
