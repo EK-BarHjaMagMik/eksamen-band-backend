@@ -18,7 +18,8 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole())); 
+        // Map the stored role string directly to Spring Security authorities.
+        return List.of(new SimpleGrantedAuthority(user.getRole()));
     }
 
     @Override
@@ -38,6 +39,8 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
+        // Locked users stay authenticated in the database but are rejected by Spring
+        // Security.
         return !user.isLocked();
     }
 
@@ -48,6 +51,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        // Inactive users cannot authenticate even if their credentials are valid.
         return user.isActive();
     }
 }

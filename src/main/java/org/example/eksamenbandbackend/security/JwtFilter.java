@@ -34,6 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
+        // Skip JWT processing when the request does not carry a bearer token.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -53,8 +54,10 @@ public class JwtFilter extends OncePerRequestFilter {
         // Only authenticate if user is not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
+            // Reload the current user so the security context uses the latest authorities.
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
+            // Re-check the token against the user before populating the security context.
             if (jwtUtil.isTokenValid(token, userDetails.getUsername())) {
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -62,6 +65,8 @@ public class JwtFilter extends OncePerRequestFilter {
                         null,
                         userDetails.getAuthorities());
 
+                // Attach request metadata so downstream code sees this as a normal
+                // authenticated request.
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
 

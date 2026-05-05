@@ -20,10 +20,12 @@ public class UserService {
 
     public User createUser(CreateUserRequest request) {
 
+        // Enforce username uniqueness before the password is encoded and stored.
         if (existsByUsername(request.username())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
+        // Email also needs to be unique for account recovery and login flows.
         if (existsByEmail(request.email())) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -33,6 +35,7 @@ public class UserService {
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(request.role());
+        // New accounts start enabled and unlocked unless an admin changes them later.
         user.setActive(true);
         user.setLocked(false);
 

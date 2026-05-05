@@ -33,10 +33,15 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
+                // Use stateless sessions because authentication is carried by JWTs.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Run the JWT filter before Spring's username/password filter so requests are
+                // pre-authenticated.
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(req -> req
+                        // Login and token issuance must remain public.
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Admin endpoints rely on the ROLE_ADMIN authority from the authenticated user.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll());
 
@@ -56,10 +61,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        // Allow local frontend development servers on any localhost port.
         config.setAllowedOriginPatterns(List.of("http://localhost:*"));
+        // Permit the HTTP methods used by the API.
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        // Expose the Authorization header so clients can read tokens from responses.
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
 

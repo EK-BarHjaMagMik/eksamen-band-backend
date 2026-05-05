@@ -22,6 +22,7 @@ public class JwtUtil {
     private String secretKeyBase64;
 
     private SecretKey getSigningKey() {
+        // Decode the configured secret once the token is created or verified.
         byte[] keyBytes = Decoders.BASE64.decode(secretKeyBase64);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -35,6 +36,7 @@ public class JwtUtil {
 
     public String generateToken(Map<String, Object> extraClaims, String username) {
         return Jwts.builder()
+                // Attach any optional claims before setting the standard JWT fields.
                 .claims().add(extraClaims).and() // modern replacement for setClaims()
                 .subject(username)
                 .issuedAt(new Date())
@@ -67,11 +69,14 @@ public class JwtUtil {
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
+        // Parse the signed token once, then project the specific claim the caller
+        // needs.
         final Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
+        // Verify the signature before exposing any token contents.
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()

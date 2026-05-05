@@ -18,10 +18,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Resolve the stored user record that Spring Security will authenticate
+        // against.
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
+        // Convert the entity to UserDetails so Spring Security can work with it.
         return new SecurityUser(user); // wraps entity into UserDetails
     }
 }

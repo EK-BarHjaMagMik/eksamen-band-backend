@@ -32,15 +32,20 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
 
         try {
+            // Let Spring Security verify the supplied credentials before issuing a token.
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.username(),
                             request.password()));
         } catch (AuthenticationException _) {
+            // Keep the failure response generic so clients only know that login failed.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // Load the user record so the response can include the authenticated user's
+        // role.
         User user = userService.findByUsername(request.username());
+        // Generate the JWT only after authentication has succeeded.
         String token = jwtUtil.generateToken(user.getUsername());
 
         return ResponseEntity.ok(
