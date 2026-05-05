@@ -37,7 +37,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(
                             request.username(),
                             request.password()));
-        } catch (AuthenticationException _) {
+        } catch (AuthenticationException e) {
             // Keep the failure response generic so clients only know that login failed.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
