@@ -18,8 +18,14 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Map the stored role string directly to Spring Security authorities.
-        return List.of(new SimpleGrantedAuthority(user.getRole()));
+        // Normalize the stored role so both "ADMIN" and "ROLE_ADMIN" work with
+        // Spring Security role checks such as hasRole("ADMIN").
+        return List.of(new SimpleGrantedAuthority(normalizeRole(user.getRole())));
+    }
+
+    private String normalizeRole(String role) {
+        String normalizedRole = role.trim();
+        return normalizedRole.startsWith("ROLE_") ? normalizedRole : "ROLE_" + normalizedRole;
     }
 
     @Override

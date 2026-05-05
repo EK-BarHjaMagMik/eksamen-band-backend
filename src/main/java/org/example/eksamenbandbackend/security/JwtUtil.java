@@ -21,10 +21,21 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKeyBase64;
 
+    private volatile SecretKey signingKey;
+
     private SecretKey getSigningKey() {
-        // Decode the configured secret once the token is created or verified.
-        byte[] keyBytes = Decoders.BASE64.decode(secretKeyBase64);
-        return Keys.hmacShaKeyFor(keyBytes);
+        SecretKey currentKey = signingKey;
+        if (currentKey == null) {
+            synchronized (this) {
+                currentKey = signingKey;
+                if (currentKey == null) {
+                    byte[] keyBytes = Decoders.BASE64.decode(secretKeyBase64);
+                    currentKey = Keys.hmacShaKeyFor(keyBytes);
+                    signingKey = currentKey;
+                }
+            }
+        }
+        return currentKey;
     }
 
     // -----------------------------
