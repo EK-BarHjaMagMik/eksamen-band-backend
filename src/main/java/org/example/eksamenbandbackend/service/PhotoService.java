@@ -16,6 +16,7 @@ public class PhotoService {
 
     public List<PhotoResponse> getPhotos() {
         return photoRepository.findAll().stream()
+                .sorted((p1, p2) -> p2.getDateTaken().compareTo(p1.getDateTaken()))
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
