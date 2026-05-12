@@ -5,7 +5,6 @@ import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class ContactInfoService {
