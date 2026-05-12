@@ -1,4 +1,22 @@
 package org.example.eksamenbandbackend.dto;
 
-public class ShowResponse {
+import org.example.eksamenbandbackend.entity.Show;
+
+import java.time.LocalDate;
+
+public record ShowResponse(
+        Long id,
+        LocalDate date,
+        String city,
+        String venue,
+        String ticketLink) {
+
+    public static ShowResponse fromEntity(Show show) {
+        return new ShowResponse(
+                show.getId(),
+                show.getDate(),
+                show.getCity(),
+                show.getVenue(),
+                show.getTicketLink());
+    }
 }

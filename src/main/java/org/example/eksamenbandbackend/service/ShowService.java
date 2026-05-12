@@ -1,6 +1,6 @@
 package org.example.eksamenbandbackend.service;
 
-import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.dto.ShowResponse;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,11 @@ public class ShowService {
         this.showRepository = showRepository;
     }
 
-    public List<Show> getUpcomingShows() {
-        return showRepository.findByDateAfterOrderByDateAsc(LocalDate.now());
+    public List<ShowResponse> getUpcomingShows() {
+        return showRepository.findByDateAfterOrderByDateAsc(LocalDate.now())
+                .stream()
+                .map(ShowResponse::fromEntity)
+                .toList();
     }
 
 }

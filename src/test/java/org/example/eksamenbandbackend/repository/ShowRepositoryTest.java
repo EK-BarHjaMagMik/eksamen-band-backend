@@ -23,18 +23,20 @@ class ShowRepositoryTest {
     void setUp() {
         showRepository.deleteAll();
 
+        LocalDate today = LocalDate.now();
+
         Show past = new Show();
-        past.setDate(LocalDate.now().minusDays(10));
+        past.setDate(today.minusDays(10));
         past.setCity("Copenhagen");
         past.setVenue("Vega");
 
         Show upcoming1 = new Show();
-        upcoming1.setDate(LocalDate.now().plusDays(5));
+        upcoming1.setDate(today.plusDays(5));
         upcoming1.setCity("Aarhus");
         upcoming1.setVenue("Train");
 
         Show upcoming2 = new Show();
-        upcoming2.setDate(LocalDate.now().plusDays(30));
+        upcoming2.setDate(today.plusDays(30));
         upcoming2.setCity("Køge");
         upcoming2.setVenue("Tapperiet");
         upcoming2.setTicketLink("https://www.tapperiet.nu");

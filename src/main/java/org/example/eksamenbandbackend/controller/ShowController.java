@@ -1,6 +1,6 @@
 package org.example.eksamenbandbackend.controller;
 
-import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.dto.ShowResponse;
 import org.example.eksamenbandbackend.service.ShowService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class ShowController {
     }
 
     @GetMapping("/upcoming")
-    public List<Show> getUpcomingShows() {
+    public List<ShowResponse> getUpcomingShows() {
         return showService.getUpcomingShows();
     }
 }
