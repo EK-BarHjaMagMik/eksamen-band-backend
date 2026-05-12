@@ -14,22 +14,22 @@ public class ContactInfoService {
         this.contactInfoRepository = contactInfoRepository;
     }
 
-    public ContactInfo get(){
-        return contactInfoRepository.findFirst().orElseThrow(() ->
+    public ContactInfoResponse get(){
+        ContactInfo contactInfo = contactInfoRepository.findFirst().orElseThrow(() ->
                 new RuntimeException("Contact info not initialized"));
+
+        return ContactInfoResponse.fromEntity(contactInfo);
     }
 
-    public ContactInfo update(ContactInfo updated){
+    public ContactInfoResponse update(ContactInfo updated){
         ContactInfo existing = contactInfoRepository.findFirst().orElse(new ContactInfo());
 
         existing.setEmail(updated.getEmail());
         existing.setPhoneNumber(updated.getPhoneNumber());
         existing.setBookingNote(updated.getBookingNote());
 
-        return contactInfoRepository.save(existing);
+        ContactInfo saved = contactInfoRepository.save(existing);
+
+        return ContactInfoResponse.fromEntity(saved);
     }
-
-    /*public ContactInfoResponse getResponse(){
-
-    }*/
 }

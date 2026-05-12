@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller;
 
+import org.example.eksamenbandbackend.dto.ContactInfoResponse;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.service.ContactInfoService;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +17,12 @@ public class ContactInfoController {
 
 
     @GetMapping
-    public ContactInfo getContactInfo(){
+    public ContactInfoResponse getContactInfo(){
         return contactInfoService.get();
     }
 
     @PutMapping
-    public ContactInfo updateContactInfo(@RequestBody ContactInfo dto){
+    public ContactInfoResponse updateContactInfo(@RequestBody ContactInfo dto){ //TODO: Refactor RequestBody to an actual DTO
         return contactInfoService.update(dto);
     }
 }
