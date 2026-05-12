@@ -17,9 +17,7 @@ public class ContactInfoService {
         //Ensure that duplicate contact info is not created
         if (existsByEmail(request.email())) {
             throw new IllegalArgumentException("Email already used");
-        }
-
-        if (existsByPhoneNumber(request.phoneNumber())){
+        }else if (existsByPhoneNumber(request.phoneNumber())){
             throw new IllegalArgumentException("Phone number already used");
         }
 
