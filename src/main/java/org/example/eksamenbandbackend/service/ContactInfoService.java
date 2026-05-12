@@ -16,7 +16,11 @@ public class ContactInfoService {
     public ContactInfo createContactInfo(CreateContactInfoRequest request){
         //Ensure that duplicate contact info is not created
         if (existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Email already used");
+        }
+
+        if (existsByPhoneNumber(request.phoneNumber())){
+            throw new IllegalArgumentException("Phone number already used");
         }
 
         ContactInfo contactInfo = new ContactInfo();
@@ -29,5 +33,9 @@ public class ContactInfoService {
 
     public boolean existsByEmail(String email){
         return contactInfoRepository.findByEmail(email).isPresent();
+    }
+
+    public boolean existsByPhoneNumber(String phoneNumber){
+        return contactInfoRepository.findByPhoneNumber(phoneNumber).isPresent();
     }
 }
