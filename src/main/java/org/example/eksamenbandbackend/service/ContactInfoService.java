@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.service;
 
+import org.example.eksamenbandbackend.dto.ContactInfoResponse;
 import org.example.eksamenbandbackend.dto.CreateContactInfoRequest;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
@@ -28,6 +29,10 @@ public class ContactInfoService {
 
         return contactInfoRepository.save(contactInfo);
     }
+
+    /*public ContactInfoResponse getContactInfo(Long id){
+        return contactInfoRepository.findAll().getFirst().
+    }*/
 
     public boolean existsByEmail(String email){
         return contactInfoRepository.findByEmail(email).isPresent();
