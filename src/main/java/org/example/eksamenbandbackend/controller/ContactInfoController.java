@@ -1,15 +1,14 @@
 package org.example.eksamenbandbackend.controller;
 
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
+import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.service.ContactInfoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/contactinfo")
+@RequestMapping("/api/contact")
 public class ContactInfoController {
 
     private ContactInfoService contactInfoService;
@@ -18,8 +17,14 @@ public class ContactInfoController {
         this.contactInfoService = contactInfoService;
     }
 
-    /*
+
     @GetMapping
-    public ResponseEntity<ContactInfoResponse> getContactInfo(Long id){
-    }*/
+    public ContactInfo getContactInfo(){
+        return contactInfoService.get();
+    }
+
+    @PutMapping
+    public ContactInfo updateContactInfo(@RequestBody ContactInfo dto){
+        return contactInfoService.update(dto);
+    }
 }

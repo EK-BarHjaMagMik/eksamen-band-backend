@@ -1,10 +1,11 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
-import org.example.eksamenbandbackend.dto.CreateContactInfoRequest;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ContactInfoService {
@@ -14,31 +15,22 @@ public class ContactInfoService {
         this.contactInfoRepository = contactInfoRepository;
     }
 
-    public ContactInfo createContactInfo(CreateContactInfoRequest request){
-        //Ensure that duplicate contact info is not created
-        if (existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already used");
-        }else if (existsByPhoneNumber(request.phoneNumber())){
-            throw new IllegalArgumentException("Phone number already used");
-        }
-
-        ContactInfo contactInfo = new ContactInfo();
-        contactInfo.setEmail(request.email());
-        contactInfo.setPhoneNumber(request.phoneNumber());
-        contactInfo.setBookingNote(request.bookingNote());
-
-        return contactInfoRepository.save(contactInfo);
+    public ContactInfo get(){
+        return contactInfoRepository.findFirst().orElseThrow(() ->
+                new RuntimeException("Contact info not initialized"));
     }
 
-    /*public ContactInfoResponse getContactInfo(Long id){
-        return contactInfoRepository.findAll().getFirst().
+    public ContactInfo update(ContactInfo updated){
+        ContactInfo existing = contactInfoRepository.findFirst().orElse(new ContactInfo());
+
+        existing.setEmail(updated.getEmail());
+        existing.setPhoneNumber(updated.getPhoneNumber());
+        existing.setBookingNote(updated.getBookingNote());
+
+        return contactInfoRepository.save(existing);
+    }
+
+    /*public ContactInfoResponse getResponse(){
+
     }*/
-
-    public boolean existsByEmail(String email){
-        return contactInfoRepository.findByEmail(email).isPresent();
-    }
-
-    public boolean existsByPhoneNumber(String phoneNumber){
-        return contactInfoRepository.findByPhoneNumber(phoneNumber).isPresent();
-    }
 }
