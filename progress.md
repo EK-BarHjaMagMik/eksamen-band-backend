@@ -18,14 +18,17 @@
 
 ## In Progress
 
-### Shows — Past (branch: EKS-10)
-- [ ] Add `photoLink` field to `Show` entity
-- [ ] Add `findByDateBeforeOrEqualOrderByDateDesc` query to `ShowRepository`
-- [ ] Add `getPastShows()` to `ShowService`
-- [ ] Add `GET /api/shows/past` to `ShowController`
-- [ ] Update seed data with past shows that have photoLink set (or null)
+### Shows — Past (branch: EKS-11-See-past-shows)
+- [x] Add `findByDateLessThanEqualOrderByDateDesc` query to `ShowRepository`
+- [x] Add `getPastShows()` to `ShowService`
+- [x] Add `GET /api/shows/past` to `ShowController`
+- [ ] Tests: `ShowRepositoryTest` and `ShowControllerTest` for past shows
 
 ## Backlog
-- [ ] `ShowResponse` DTO — currently empty/unused; wire it up instead of returning raw entities
-- [ ] Photo gallery feature (photos not implemented yet — just photoLink placeholder)
+- [ ] `hasPhotos` boolean on `ShowResponse` — next user story, indicates whether a past show has photos
+- [ ] Photo gallery feature — separate user story, internal gallery linked to shows
 - [ ] Admin CRUD for shows
+
+## Notes
+- `ShowResponse` DTO is wired up and used (records-based, `fromEntity` static factory)
+- 3 of 5 seed shows are already in the past (dates before 2026-05-12): Helsingør, Albertslund, Lyngby

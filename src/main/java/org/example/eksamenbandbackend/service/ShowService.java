@@ -23,4 +23,10 @@ public class ShowService {
                 .toList();
     }
 
+    public List<ShowResponse> getPastShows() {
+        return showRepository.findByDateLessThanEqualOrderByDateDesc(LocalDate.now())
+                .stream()
+                .map(ShowResponse::fromEntity)
+                .toList();
+    }
 }

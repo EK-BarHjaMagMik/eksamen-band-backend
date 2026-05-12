@@ -24,4 +24,9 @@ public class ShowController {
     public ResponseEntity<List<ShowResponse>> getUpcomingShows() {
         return new ResponseEntity<>(showService.getUpcomingShows(), HttpStatus.OK);
     }
+
+    @GetMapping("/past")
+    public ResponseEntity<List<ShowResponse>> getPastShows() {
+        return new ResponseEntity<>(showService.getPastShows(), HttpStatus.OK);
+    }
 }
