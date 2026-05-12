@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "contactinfo")
 @Getter
 @Setter
 public class ContactInfo {
