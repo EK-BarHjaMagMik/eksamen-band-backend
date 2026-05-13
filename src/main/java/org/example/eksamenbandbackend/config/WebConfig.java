@@ -1,5 +1,7 @@
 package org.example.eksamenbandbackend.config;
 
+import java.nio.file.Paths;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -13,8 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ensure trailing slash
-        String location = "file:" + (uploadDir.endsWith("/") ? uploadDir : uploadDir + "/");
+        String location = Paths.get(uploadDir.trim()).toAbsolutePath().toUri().toString();
+        if (!location.endsWith("/")) location += "/";
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(location);

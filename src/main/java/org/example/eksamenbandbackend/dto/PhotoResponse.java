@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import org.example.eksamenbandbackend.entity.Photo;
 
 public record PhotoResponse(
-        Long photoId,
+        Long id,
         String url,
         String caption,
         LocalDate dateTaken,
@@ -13,7 +13,7 @@ public record PhotoResponse(
 
     public static PhotoResponse fromEntity(Photo photo) {
         return new PhotoResponse(
-                photo.getPhotoId(),
+                photo.getId(),
                 photo.getUrl(),
                 photo.getCaption(),
                 photo.getDateTaken(),

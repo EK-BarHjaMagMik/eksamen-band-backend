@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/api/photos")
 public class PhotoController {
 
-    private PhotoService photoService;
+    private final PhotoService photoService;
 
     public PhotoController(PhotoService photoService) {
         this.photoService = photoService;

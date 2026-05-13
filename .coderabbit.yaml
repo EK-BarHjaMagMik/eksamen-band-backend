@@ -1,0 +1,19 @@
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "src/main/java/**/security/**"
+      instructions: "Focus on JWT handling, token validation, and auth filter correctness. Flag any hardcoded secrets or overly permissive security rules."
+    - path: "src/main/java/**/config/**"
+      instructions: "Check security config for overly broad rules (e.g. permitAll on sensitive paths). Check initialization logic for idempotency and correct seeding. Flag any misconfigured CORS or resource handlers."
+    - path: "src/main/java/**/controller/**"
+      instructions: "Check that endpoints return appropriate HTTP status codes. Flag missing input validation on request bodies. Verify admin endpoints are properly secured."
+    - path: "src/main/java/**/service/**"
+      instructions: "Check exception handling — RuntimeException should not be used where a proper HTTP status is expected. Flag nullable field access that could cause NullPointerException."
+    - path: "src/main/java/**/repository/**"
+      instructions: "Check that derived query methods follow Spring Data JPA naming conventions. Flag non-deterministic queries (e.g. findFirstBy without ordering)."
+    - path: "src/test/**"
+      instructions: "Ensure tests assert actual behavior and not just that code runs. Check that test data is properly isolated using @BeforeEach cleanup. Verify the test profile is active."
+    - path: "src/main/resources/**"
+      instructions: "Flag hardcoded secrets or insecure fallback values in properties files. Check that sensitive config uses environment variables with no unsafe defaults."

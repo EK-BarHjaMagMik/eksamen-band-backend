@@ -2,6 +2,7 @@ package org.example.eksamenbandbackend.entity;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,12 +17,14 @@ import lombok.Setter;
 public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long photoId;
+    @Column(name = "photo_id")
+    private Long id;
 
     private String url;
 
     private String caption;
 
+    @Column(nullable = false)
     private LocalDate dateTaken;
 
     private String photographer;
