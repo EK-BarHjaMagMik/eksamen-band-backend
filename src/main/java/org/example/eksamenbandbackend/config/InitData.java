@@ -87,7 +87,7 @@ public class InitData implements CommandLineRunner {
         ContactInfo contact = new ContactInfo();
         contact.setEmail("stuggofficial@gmail.com");
         contact.setPhoneNumber("+45 12 34 56 78");
-        contact.setBookingNote("For booking enquiries, reach out via email or phone.");
+        contact.setBookingNote("For booking enquiries, reach out via email.");
 
         contactInfoRepository.save(contact);
         System.out.println("Contact info initialized");
