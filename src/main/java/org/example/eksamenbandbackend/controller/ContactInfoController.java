@@ -21,9 +21,4 @@ public class ContactInfoController {
     public ResponseEntity<ContactInfoResponse> getContactInfo() {
         return new ResponseEntity<>(contactInfoService.get(), HttpStatus.OK);
     }
-
-    @PutMapping
-    public ResponseEntity<ContactInfoResponse> updateContactInfo(@RequestBody UpdateContactInfoRequest request) {
-        return new ResponseEntity<>(contactInfoService.update(request), HttpStatus.OK);
-    }
 }
