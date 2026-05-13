@@ -16,14 +16,14 @@ public class ContactInfoService {
     }
 
     public ContactInfoResponse get(){
-        ContactInfo contactInfo = contactInfoRepository.findFirstBy().orElseThrow(() ->
+        ContactInfo contactInfo = contactInfoRepository.findTopByOrderByIdAsc().orElseThrow(() ->
                 new RuntimeException("Contact info not initialized"));
 
         return ContactInfoResponse.fromEntity(contactInfo);
     }
 
     public ContactInfoResponse update(UpdateContactInfoRequest request){
-        ContactInfo existing = contactInfoRepository.findFirstBy().orElse(new ContactInfo());
+        ContactInfo existing = contactInfoRepository.findTopByOrderByIdAsc().orElse(new ContactInfo());
 
         existing.setEmail(request.email());
         existing.setPhoneNumber(request.phoneNumber());

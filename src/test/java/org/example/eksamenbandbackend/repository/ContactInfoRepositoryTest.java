@@ -32,7 +32,7 @@ class ContactInfoRepositoryTest {
 
     @Test
     void shouldReturnContactInfoWhenPresent() {
-        Optional<ContactInfo> result = contactInfoRepository.findFirstBy();
+        Optional<ContactInfo> result = contactInfoRepository.findTopByOrderByIdAsc();
 
         assertThat(result).isPresent();
         assertThat(result.get().getEmail()).isEqualTo("test@example.com");
@@ -42,7 +42,7 @@ class ContactInfoRepositoryTest {
     void shouldReturnEmptyWhenNoContactInfo() {
         contactInfoRepository.deleteAll();
 
-        Optional<ContactInfo> result = contactInfoRepository.findFirstBy();
+        Optional<ContactInfo> result = contactInfoRepository.findTopByOrderByIdAsc();
 
         assertThat(result).isEmpty();
     }
