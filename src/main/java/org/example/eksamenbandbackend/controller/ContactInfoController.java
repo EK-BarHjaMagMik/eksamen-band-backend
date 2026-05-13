@@ -1,7 +1,6 @@
 package org.example.eksamenbandbackend.controller;
 
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
-import org.example.eksamenbandbackend.dto.UpdateContactInfoRequest;
 import org.example.eksamenbandbackend.service.ContactInfoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
