@@ -1,28 +1,29 @@
 package org.example.eksamenbandbackend.controller;
 
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
-import org.example.eksamenbandbackend.entity.ContactInfo;
+import org.example.eksamenbandbackend.dto.UpdateContactInfoRequest;
 import org.example.eksamenbandbackend.service.ContactInfoService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/contact")
 public class ContactInfoController {
 
-    private ContactInfoService contactInfoService;
+    private final ContactInfoService contactInfoService;
 
-    public ContactInfoController(ContactInfoService contactInfoService){
+    public ContactInfoController(ContactInfoService contactInfoService) {
         this.contactInfoService = contactInfoService;
     }
 
-
     @GetMapping
-    public ContactInfoResponse getContactInfo(){
-        return contactInfoService.get();
+    public ResponseEntity<ContactInfoResponse> getContactInfo() {
+        return new ResponseEntity<>(contactInfoService.get(), HttpStatus.OK);
     }
 
     @PutMapping
-    public ContactInfoResponse updateContactInfo(@RequestBody ContactInfo dto){ //TODO: Refactor RequestBody to an actual DTO
-        return contactInfoService.update(dto);
+    public ResponseEntity<ContactInfoResponse> updateContactInfo(@RequestBody UpdateContactInfoRequest request) {
+        return new ResponseEntity<>(contactInfoService.update(request), HttpStatus.OK);
     }
 }

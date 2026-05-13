@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
+import org.example.eksamenbandbackend.dto.UpdateContactInfoRequest;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.springframework.stereotype.Service;
@@ -15,18 +16,18 @@ public class ContactInfoService {
     }
 
     public ContactInfoResponse get(){
-        ContactInfo contactInfo = contactInfoRepository.findFirst().orElseThrow(() ->
+        ContactInfo contactInfo = contactInfoRepository.findFirstBy().orElseThrow(() ->
                 new RuntimeException("Contact info not initialized"));
 
         return ContactInfoResponse.fromEntity(contactInfo);
     }
 
-    public ContactInfoResponse update(ContactInfo updated){
-        ContactInfo existing = contactInfoRepository.findFirst().orElse(new ContactInfo());
+    public ContactInfoResponse update(UpdateContactInfoRequest request){
+        ContactInfo existing = contactInfoRepository.findFirstBy().orElse(new ContactInfo());
 
-        existing.setEmail(updated.getEmail());
-        existing.setPhoneNumber(updated.getPhoneNumber());
-        existing.setBookingNote(updated.getBookingNote());
+        existing.setEmail(request.email());
+        existing.setPhoneNumber(request.phoneNumber());
+        existing.setBookingNote(request.bookingNote());
 
         ContactInfo saved = contactInfoRepository.save(existing);
 
