@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
+import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.service.UserService;
 import org.springframework.boot.CommandLineRunner;
@@ -19,11 +21,13 @@ public class InitData implements CommandLineRunner {
     private final UserService userService;
     private final PhotoRepository photoRepository;
     private final ShowRepository showRepository;
+    private final ContactInfoRepository contactInfoRepository;
 
-    public InitData(UserService userService, PhotoRepository photoRepository, ShowRepository showRepository) {
+    public InitData(UserService userService, PhotoRepository photoRepository, ShowRepository showRepository, ContactInfoRepository contactInfoRepository) {
         this.userService = userService;
         this.photoRepository = photoRepository;
         this.showRepository = showRepository;
+        this.contactInfoRepository = contactInfoRepository;
     }
 
     @Override
@@ -31,6 +35,7 @@ public class InitData implements CommandLineRunner {
         initAdmin();
         initSamplePhotos();
         initShows();
+        initContactInfo();
     }
 
     private void initAdmin() {
@@ -105,6 +110,21 @@ public class InitData implements CommandLineRunner {
 
         showRepository.saveAll(List.of(s1, s2, s3, s4, s5));
         System.out.println("Shows initialized");
+    }
+
+    private void initContactInfo() {
+        if (contactInfoRepository.count() > 0) {
+            System.out.println("Contact info already exists — skipping init.");
+            return;
+        }
+
+        ContactInfo contact = new ContactInfo();
+        contact.setEmail("stuggofficial@gmail.com");
+        contact.setPhoneNumber("+45 12 34 56 78");
+        contact.setBookingNote("For booking enquiries, reach out via email.");
+
+        contactInfoRepository.save(contact);
+        System.out.println("Contact info initialized");
     }
 
 }
