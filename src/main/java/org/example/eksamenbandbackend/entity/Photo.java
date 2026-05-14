@@ -8,11 +8,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@Table(
+    name = "photo",
+    indexes = {
+        @Index(name = "idx_photo_date_taken", columnList = "date_taken DESC")
+    }
+)
 @Getter
 @Setter
 public class Photo {
