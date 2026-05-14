@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
 import org.example.eksamenbandbackend.entity.BandBio;
+import org.jspecify.annotations.NonNull;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.BandBioRepository;
@@ -35,7 +36,7 @@ public class InitData implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(@NonNull String... args) {
         initAdmin();
         initSamplePhotos();
         initShows();
@@ -124,12 +125,14 @@ public class InitData implements CommandLineRunner {
         }
 
         BandBio bio = new BandBio();
-        bio.setContent(
-                "STÜGG is a 5 piece heavy metal band from Denmark. The boys have been playing together since early 2017 and released their debut album \"GO FOR THE THROAT\" in 2020.\n\n" +
-                "They started working on their second album during the global pandemic, and the frustration of lockdowns worked as fuel for their music to go in a heavier direction.\n\n" +
-                "The result can be heard on their second album \"Shepherd of The Pit\" released June 2nd 2023.\n\n" +
-                "Their music can be described as heavy metal, with influences from Thrash and Groovemetal. They fuse thrashy and groovy riffs with melodic and catchy choruses, heavy breakdowns, fast guitar solos with an amalgamation of clean singing, screaming and growling. All in all a combination that surely will make your neck sore!"
-        );
+        bio.setContent("""
+                STÜGG is a 5 piece heavy metal band from Denmark. The boys have been playing together since early 2017 and released their debut album "GO FOR THE THROAT" in 2020.
+
+                They started working on their second album during the global pandemic, and the frustration of lockdowns worked as fuel for their music to go in a heavier direction.
+
+                The result can be heard on their second album "Shepherd of The Pit" released June 2nd 2023.
+
+                Their music can be described as heavy metal, with influences from Thrash and Groovemetal. They fuse thrashy and groovy riffs with melodic and catchy choruses, heavy breakdowns, fast guitar solos with an amalgamation of clean singing, screaming and growling. All in all a combination that surely will make your neck sore!""");
 
         bandBioRepository.save(bio);
         System.out.println("Band bio initialized");
