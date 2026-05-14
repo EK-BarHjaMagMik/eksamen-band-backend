@@ -1,7 +1,6 @@
 package org.example.eksamenbandbackend.repository;
 
 import org.example.eksamenbandbackend.entity.Show;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
