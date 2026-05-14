@@ -4,7 +4,6 @@ import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.jspecify.annotations.NonNull;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     private String uploadDir;
 
     @Override
-    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String location = Paths.get(uploadDir.trim()).toAbsolutePath().toUri().toString();
         if (!location.endsWith("/")) location += "/";
 

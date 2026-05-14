@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
+import org.example.eksamenbandbackend.entity.BandBio;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.entity.Photo;
+import org.example.eksamenbandbackend.repository.BandBioRepository;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
@@ -22,12 +24,14 @@ public class InitData implements CommandLineRunner {
     private final PhotoRepository photoRepository;
     private final ShowRepository showRepository;
     private final ContactInfoRepository contactInfoRepository;
+    private final BandBioRepository bandBioRepository;
 
-    public InitData(UserService userService, PhotoRepository photoRepository, ShowRepository showRepository, ContactInfoRepository contactInfoRepository) {
+    public InitData(UserService userService, PhotoRepository photoRepository, ShowRepository showRepository, ContactInfoRepository contactInfoRepository, BandBioRepository bandBioRepository) {
         this.userService = userService;
         this.photoRepository = photoRepository;
         this.showRepository = showRepository;
         this.contactInfoRepository = contactInfoRepository;
+        this.bandBioRepository = bandBioRepository;
     }
 
     @Override
@@ -36,6 +40,7 @@ public class InitData implements CommandLineRunner {
         initSamplePhotos();
         initShows();
         initContactInfo();
+        initBandBio();
     }
 
     private void initAdmin() {
@@ -112,19 +117,46 @@ public class InitData implements CommandLineRunner {
         System.out.println("Shows initialized");
     }
 
-    private void initContactInfo() {
-        if (contactInfoRepository.count() > 0) {
-            System.out.println("Contact info already exists — skipping init.");
+    private void initBandBio() {
+        if (bandBioRepository.count() > 0) {
+            System.out.println("Band bio already exists — skipping init.");
             return;
         }
 
-        ContactInfo contact = new ContactInfo();
-        contact.setEmail("stuggofficial@gmail.com");
-        contact.setPhoneNumber("+45 12 34 56 78");
-        contact.setBookingNote("For booking enquiries, reach out via email.");
+        BandBio bio = new BandBio();
+        bio.setContent(
+                "STÜGG is a 5 piece heavy metal band from Denmark. The boys have been playing together since early 2017 and released their debut album \"GO FOR THE THROAT\" in 2020.\n\n" +
+                "They started working on their second album during the global pandemic, and the frustration of lockdowns worked as fuel for their music to go in a heavier direction.\n\n" +
+                "The result can be heard on their second album \"Shepherd of The Pit\" released June 2nd 2023.\n\n" +
+                "Their music can be described as heavy metal, with influences from Thrash and Groovemetal. They fuse thrashy and groovy riffs with melodic and catchy choruses, heavy breakdowns, fast guitar solos with an amalgamation of clean singing, screaming and growling. All in all a combination that surely will make your neck sore!"
+        );
+
+        bandBioRepository.save(bio);
+        System.out.println("Band bio initialized");
+    }
+
+    private void initContactInfo() {
+        ContactInfo contact = contactInfoRepository.findTopByOrderByIdAsc().orElse(new ContactInfo());
+
+        boolean isNew = contact.getId() == null;
+        boolean missingBookingEmail = contact.getBookingEmail() == null;
+        boolean missingEmailNote = contact.getEmailNote() == null;
+        boolean outdatedBookingNote = !"Management, bookings, media".equals(contact.getBookingNote());
+
+        if (!isNew && !missingBookingEmail && !missingEmailNote && !outdatedBookingNote) {
+            System.out.println("Contact info already up to date — skipping init.");
+            return;
+        }
+
+        if (isNew) {
+            contact.setEmail("stuggofficial@gmail.com");
+        }
+        contact.setBookingEmail("kinnie@beatbreaker.dk");
+        contact.setEmailNote("Fan mail, questions, feedback");
+        contact.setBookingNote("Management, bookings, media");
 
         contactInfoRepository.save(contact);
-        System.out.println("Contact info initialized");
+        System.out.println(isNew ? "Contact info initialized" : "Contact info updated with bookingEmail");
     }
 
 }
