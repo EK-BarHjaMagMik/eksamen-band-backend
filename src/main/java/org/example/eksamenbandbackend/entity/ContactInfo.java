@@ -16,7 +16,13 @@ public class ContactInfo {
     private String email;
 
     @Column(unique = true)
+    private String bookingEmail;
+
+    @Column(unique = true)
     private String phoneNumber;
+
+    @Column
+    private String emailNote;
 
     @Column
     private String bookingNote;
