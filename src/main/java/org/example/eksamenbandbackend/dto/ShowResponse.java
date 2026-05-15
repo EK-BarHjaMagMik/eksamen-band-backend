@@ -9,14 +9,15 @@ public record ShowResponse(
         LocalDate date,
         String city,
         String venue,
-        String ticketLink) {
-
-    public static ShowResponse fromEntity(Show show) {
+        String ticketLink,
+        boolean hasPhotos) {
+    public static ShowResponse fromEntity(Show show, boolean hasPhotos) {
         return new ShowResponse(
                 show.getId(),
                 show.getDate(),
                 show.getCity(),
                 show.getVenue(),
-                show.getTicketLink());
+                show.getTicketLink(),
+                hasPhotos);
     }
 }

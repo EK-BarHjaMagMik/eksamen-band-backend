@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,6 +41,10 @@ public class Photo {
     private String photographer;
 
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "show_id")
+    private Show show;
 
     @PrePersist
     protected void onCreate() {
