@@ -60,4 +60,29 @@ class ShowControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void shouldReturnShowByIdWithStatus200() throws Exception {
+        Show show = new Show();
+        show.setDate(LocalDate.now().plusDays(5));
+        show.setCity("Roskilde");
+        show.setVenue("Pumpehuset");
+        show.setTicketLink("https://example.com/tickets");
+
+        Show saved = showRepository.save(show);
+
+        mockMvc.perform(get("/api/shows/{id}", saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.city").value("Roskilde"))
+                .andExpect(jsonPath("$.venue").value("Pumpehuset"))
+                .andExpect(jsonPath("$.ticketLink").value("https://example.com/tickets"));
+    }
+
+    @Test
+    void shouldReturn404WhenShowNotFound() throws Exception {
+        showRepository.deleteAll();
+
+        mockMvc.perform(get("/api/shows/{id}", 9999L))
+                .andExpect(status().isNotFound());
+    }
 }

@@ -3,7 +3,9 @@ package org.example.eksamenbandbackend.service;
 import org.example.eksamenbandbackend.dto.ShowResponse;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,6 +47,6 @@ public class ShowService {
                     boolean hasPhotos = photoRepository.existsByShowId(show.getId());
                     return ShowResponse.fromEntity(show, hasPhotos);
                 })
-                .orElseThrow(() -> new RuntimeException("Show not found with id: " + showId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
     }
 }

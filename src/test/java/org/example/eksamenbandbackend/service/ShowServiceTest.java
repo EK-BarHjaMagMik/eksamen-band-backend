@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -142,5 +143,32 @@ class ShowServiceTest {
 
         assertTrue(responses.isEmpty());
         verify(photoRepository, never()).existsByShowId(anyLong());
+    }
+
+    // -------------------------
+    // getShowById
+    // -------------------------
+    @Test
+    void getShowById_returnsMappedResponseWhenFound() {
+        LocalDate date = LocalDate.now();
+        Show s = show(42L, date, "TestCity", "TestVenue");
+
+        when(showRepository.findById(42L)).thenReturn(Optional.of(s));
+        when(photoRepository.existsByShowId(42L)).thenReturn(true);
+
+        ShowResponse resp = showService.getShowById(42L);
+
+        verify(photoRepository).existsByShowId(42L);
+        assertEquals(42L, resp.id());
+        assertEquals(date, resp.date());
+        assertTrue(resp.hasPhotos());
+    }
+
+    @Test
+    void getShowById_throwsWhenNotFound() {
+        when(showRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> showService.getShowById(99L));
+        assertTrue(ex.getMessage().contains("Show not found"));
     }
 }
