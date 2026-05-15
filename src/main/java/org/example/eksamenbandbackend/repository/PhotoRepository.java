@@ -13,4 +13,5 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     // dynamic limit via Pageable: use PageRequest.of(0, limit)
     List<Photo> findAllByOrderByDateTakenDesc(Pageable pageable);
 
+    boolean existsByShowId(Long showId);
 }
