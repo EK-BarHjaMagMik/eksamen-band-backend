@@ -11,5 +11,6 @@ public interface ShowRepository extends JpaRepository<Show, Long> {
     Optional<Show> findById(Long id);
 
     List<Show> findByDateAfterOrderByDateAsc(LocalDate date);
+
     List<Show> findByDateLessThanEqualOrderByDateDesc(LocalDate date);
 }

@@ -38,4 +38,13 @@ public class ShowService {
                 })
                 .toList();
     }
+
+    public ShowResponse getShowById(Long showId) {
+        return showRepository.findById(showId)
+                .map(show -> {
+                    boolean hasPhotos = photoRepository.existsByShowId(show.getId());
+                    return ShowResponse.fromEntity(show, hasPhotos);
+                })
+                .orElseThrow(() -> new RuntimeException("Show not found with id: " + showId));
+    }
 }
