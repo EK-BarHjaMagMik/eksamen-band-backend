@@ -22,7 +22,10 @@ public class PhotoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PhotoResponse>> getPhotos() {
+    public ResponseEntity<List<PhotoResponse>> getPhotos(@RequestParam(required = false) Long showId) {
+        if (showId != null) {
+            return new ResponseEntity<>(photoService.getPhotosByShowId(showId), HttpStatus.OK);
+        }
         return new ResponseEntity<>(photoService.getPhotos(), HttpStatus.OK);
     }
 

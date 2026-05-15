@@ -28,4 +28,10 @@ public class PhotoService {
             .map(PhotoResponse::fromEntity)
             .toList();
     }
+
+    public List<PhotoResponse> getPhotosByShowId(Long showId) {
+        return photoRepository.findAllByShowIdOrderByDateTakenDesc(showId).stream()
+                .map(PhotoResponse::fromEntity)
+                .toList();
+    }
 }

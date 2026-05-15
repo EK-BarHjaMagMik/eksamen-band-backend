@@ -14,4 +14,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     List<Photo> findAllByOrderByDateTakenDesc(Pageable pageable);
 
     boolean existsByShowId(Long showId);
+
+    List<Photo> findAllByShowIdOrderByDateTakenDesc(Long showId);
 }
