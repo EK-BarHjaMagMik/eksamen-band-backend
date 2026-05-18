@@ -1,6 +1,6 @@
 # Backend Progress — Stügg
 
-_Gitignored. Local only. Last updated: 2026-05-14._
+_Gitignored. Local only. Last updated: 2026-05-18._
 
 ---
 
@@ -10,29 +10,33 @@ Spring Boot REST API, JWT auth, JPA/H2 (or configured DB).
 
 ```
 config/
-  InitData.java            # seeds admin user, 5 shows, contact info on startup
+  InitData.java            # seeds admin user, shows, photos, contact info on startup
 controller/
   AuthController.java      # POST /api/auth/login
-  ShowController.java      # GET /api/shows/upcoming, GET /api/shows/past
+  ShowController.java      # GET /api/shows/upcoming, /past, /{showId}
+  PhotoController.java     # GET /api/photos, /api/photos/recent, /api/shows/{showId}/photos
   ContactInfoController.java  # GET /api/contact
   admin/
     AdminUserController.java  # POST /api/admin/users (auth required)
 dto/
   AuthResponse             # token, username, role
   LoginRequest             # username, password
-  ShowResponse             # id, date, city, venue, ticketLink
+  ShowResponse             # id, date, city, venue, ticketLink, hasPhotos
+  PhotoResponse            # id, url, caption, dateTaken, photographer
   ContactInfoResponse      # id, email, phoneNumber, bookingNote
   UpdateContactInfoRequest # email, phoneNumber, bookingNote — ORPHANED (no endpoint uses it)
   CreateUserRequest        # username, email, password, role
   UserResponse             # id, username, email, role
 entity/
   Show                     # id, date, city, venue, ticketLink
+  Photo                    # id, url, caption, dateTaken, photographer, createdAt, show (ManyToOne)
   ContactInfo              # id, email, phoneNumber, bookingNote
   User                     # id, username, email, password (hashed), role
 security/
   JwtUtil / JwtFilter / SecurityConfig / SecurityUser / CustomUserDetailsService
 service/
-  ShowService              # getUpcomingShows(), getPastShows()
+  ShowService              # getUpcomingShows(), getPastShows(), getShowById()
+  PhotoService             # getPhotos(), getRecentPhotos(int), getPhotosByShowId(Long)
   ContactInfoService       # get(), update() — update() has no controller endpoint yet
   UserService              # createUser(), findByUsername(), existsByUsername()
 ```
@@ -52,11 +56,15 @@ service/
 | Method | Endpoint                 | Auth required | Status   | Frontend wired?       |
 |--------|--------------------------|---------------|----------|-----------------------|
 | POST   | /api/auth/login          | No            | Done     | No (no login page yet)|
-| GET    | /api/shows/upcoming      | No            | Done     | Yes — fully rendered  |
-| GET    | /api/shows/past          | No            | Done     | Service only (component stub) |
-| GET    | /api/contact             | No            | Done     | Partial (bookingNote only; email+phone ignored by frontend) |
-| POST   | /api/admin/users         | Yes (ROLE_ADMIN) | Done  | No                    |
-| PUT    | /api/admin/contact       | —             | Missing  | No — service method exists, no endpoint |
+| GET    | /api/shows/upcoming           | No               | Done    | Yes — fully rendered  |
+| GET    | /api/shows/past               | No               | Done    | Service only (component stub) |
+| GET    | /api/shows/{showId}           | No               | Done    | No |
+| GET    | /api/contact                  | No               | Done    | Partial (bookingNote only; email+phone ignored by frontend) |
+| GET    | /api/photos                   | No               | Done    | No |
+| GET    | /api/photos/recent            | No               | Done    | No |
+| GET    | /api/shows/{showId}/photos    | No               | Done    | No |
+| POST   | /api/admin/users              | Yes (ROLE_ADMIN) | Done    | No                    |
+| PUT    | /api/admin/contact            | —                | Missing | No — service method exists, no endpoint |
 
 ---
 
@@ -93,9 +101,11 @@ service/
 
 ## In Progress
 
-### EKS-11 — See past shows (current branch)
-- [ ] Tests: `ShowRepositoryTest` — add past-shows query test
-- [ ] Tests: `ShowControllerTest` — add `GET /api/shows/past` test
+### EKS-28 — See individual band member information (current branch)
+- [ ] EKS-78: `Member` entity (name, role, bio, displayOrder)
+- [ ] EKS-79: `MemberRepository`, `MemberService`
+- [ ] EKS-80: `GET /api/members` endpoint — sorted by displayOrder
+- [ ] EKS-81: Seed Stügg members in `InitData`
 
 ---
 
@@ -111,12 +121,12 @@ service/
   - `ContactInfoService.update()` is already implemented, just needs a controller endpoint
   - `UpdateContactInfoRequest` DTO is ready
 
-### Photo gallery (EKS-16)
-- [ ] `Photo` entity (id, url/filename, caption, showId FK?)
-- [ ] `PhotoRepository`
-- [ ] `GET /api/photos` endpoint
-- [ ] Decide: photos linked to shows, or standalone gallery?
-- [ ] `hasPhotos` boolean on `ShowResponse` — indicates whether a past show has associated photos
+### Photo gallery (EKS-12) — DONE (merged 2026-05-18)
+- [x] `Photo` entity (id, url, caption, dateTaken, photographer, show FK with ON DELETE SET NULL)
+- [x] `PhotoRepository`
+- [x] `GET /api/photos`, `/api/photos/recent`, `/api/shows/{showId}/photos` endpoints
+- [x] `hasPhotos` on `ShowResponse`
+- [x] Seed data: 10 sample photos, last 5 linked to UHØRT show
 
 ### News / blog
 - [ ] `NewsPost` entity — no design agreed yet
@@ -138,3 +148,4 @@ service/
 |------------|-----------|
 | 2026-05-12 | past shows endpoint added (df75ed4), progress.md created |
 | 2026-05-14 | Cross-examined with frontend; expanded progress.md with full endpoint inventory, seed data table, dead code notes, frontend alignment gaps |
+| 2026-05-18 | Photo gallery (EKS-12) merged; show error handling + tests added; starting EKS-28 (Member entity) |
