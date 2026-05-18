@@ -15,8 +15,10 @@ public class BandMemberService {
         this.bandMemberRepository = bandMemberRepository;
     }
 
-    public List<BandMemberResponse>
-
-
-
+    public List<BandMemberResponse> getBandMembers() {
+        return bandMemberRepository.findAllByOrderByDisplayOrderAsc()
+                .stream()
+                .map(BandMemberResponse::fromEntity)
+                .toList();
+    }
 }
