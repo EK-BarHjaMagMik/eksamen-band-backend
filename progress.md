@@ -1,6 +1,6 @@
 # Backend Progress — Stügg
 
-_Gitignored. Local only. Last updated: 2026-05-18._
+_LOCAL ONLY — DO NOT COMMIT OR PUSH. Listed in .gitignore. Last updated: 2026-05-19._
 
 ---
 
@@ -101,11 +101,11 @@ service/
 
 ## In Progress
 
-### EKS-28 — See individual band member information (current branch)
+### EKS-28 — See individual band member information — DONE
 - [x] EKS-78: `BandMember` entity (name, role, bio, displayOrder) — `entity/BandMember.java`
 - [x] EKS-79: `BandMemberRepository`, `BandMemberService`, `BandMemberResponse` DTO
 - [x] EKS-80: `GET /api/band-members` endpoint — sorted by displayOrder ascending
-- [ ] EKS-81: Seed Stügg members in `InitData` — **next up**
+- [x] EKS-81: Seed Stügg members in `InitData` — 5 members seeded (Kinnie, Mads, Mikkel, Mathias, Emil)
 
 ---
 
@@ -150,3 +150,4 @@ service/
 | 2026-05-14 | Cross-examined with frontend; expanded progress.md with full endpoint inventory, seed data table, dead code notes, frontend alignment gaps |
 | 2026-05-18 | Photo gallery (EKS-12) merged; show error handling + tests added; starting EKS-28 (Member entity) |
 | 2026-05-18 | EKS-78/79/80 done: BandMember entity, repository, service, DTO, controller all complete. Next: InitData seed (EKS-81) |
+| 2026-05-19 | EKS-81 done: 5 Stügg members seeded in InitData. EKS-28 fully complete. |
