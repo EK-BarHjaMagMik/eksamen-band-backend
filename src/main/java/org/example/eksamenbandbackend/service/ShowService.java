@@ -53,6 +53,10 @@ public class ShowService {
     }
 
     public Show createUpcomingShow(CreateShowRequest request){
+        if (request.date().isBefore(LocalDate.now())){
+
+        }
+
         if (ifExistsByDate(request.date())){
             throw new IllegalArgumentException("There is already a show on this date");
         }
