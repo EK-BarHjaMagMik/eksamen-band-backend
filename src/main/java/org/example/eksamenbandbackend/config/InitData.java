@@ -163,33 +163,33 @@ public class InitData implements CommandLineRunner {
         }
 
         BandMember m1 = new BandMember();
-        m1.setName("Kinnie");
+        m1.setName("Kasper");
         m1.setRole("Vocals");
-        m1.setBio("Kinnie is the lead vocalist of STÜGG, known for his powerful and versatile voice that can switch between clean singing, screaming, and growling with ease.");
+        m1.setBio("Kasper is the lead vocalist of STÜGG, known for his powerful and versatile voice that can switch between clean singing, screaming, and growling with ease.");
         m1.setDisplayOrder(1);
 
         BandMember m2 = new BandMember();
-        m2.setName("Mads");
+        m2.setName("Morten");
         m2.setRole("Guitar");
-        m2.setBio("Mads is the guitarist of STÜGG, responsible for crafting the band's heavy riffs and melodic solos that define their sound.");
+        m2.setBio("Morten is the guitarist of STÜGG, responsible for crafting the band's heavy riffs and melodic solos that define their sound.");
         m2.setDisplayOrder(2);
 
         BandMember m3 = new BandMember();
-        m3.setName("Mikkel");
+        m3.setName("Andreas");
         m3.setRole("Guitar");
-        m3.setBio("Mikkel is the second guitarist of STÜGG, complementing Mads with his own unique style and contributing to the band's dynamic guitar work.");
-        m3.setDisplayOrder(3
-        );
+        m3.setBio("Andreas is the second guitarist of STÜGG, complementing Morten with his own unique style and contributing to the band's dynamic guitar work.");
+        m3.setDisplayOrder(3);
+        
         BandMember m4 = new BandMember();
-        m4.setName("Mathias");
+        m4.setName("Mikkel");
         m4.setRole("Bass");
-        m4.setBio("Mathias is the bassist of STÜGG, providing the low-end foundation and groove that drives the band's heavy sound.");
+        m4.setBio("Mikkel is the bassist of STÜGG, providing the low-end foundation and groove that drives the band's heavy sound.");
         m4.setDisplayOrder(4);
 
         BandMember m5 = new BandMember();
-        m5.setName("Emil");
+        m5.setName("Gustav");
         m5.setRole("Drums");
-        m5.setBio("Emil is the drummer of STÜGG, known for his powerful and precise drumming style that adds intensity and energy to the band's music.");
+        m5.setBio("Gustav is the drummer of STÜGG, known for his powerful and precise drumming style that adds intensity and energy to the band's music.");
         m5.setDisplayOrder(5);
         bandMemberRepository.saveAll(List.of(m1, m2, m3, m4, m5));
         System.out.println("BandMembers initialized");
