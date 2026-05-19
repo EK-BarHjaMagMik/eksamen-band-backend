@@ -102,6 +102,9 @@
 	</dependencies>
 
 	<build>
+		<!-- Fixed artifact name so the Dockerfile can copy target/app.jar
+		     deterministically instead of globbing target/*.jar. -->
+		<finalName>app</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
