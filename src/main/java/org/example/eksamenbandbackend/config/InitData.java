@@ -5,8 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
-import org.example.eksamenbandbackend.entity.*;
-import org.example.eksamenbandbackend.repository.*;
+import org.example.eksamenbandbackend.entity.BandBio;
+import org.example.eksamenbandbackend.entity.BandMember;
+import org.example.eksamenbandbackend.entity.ContactInfo;
+import org.example.eksamenbandbackend.entity.Photo;
+import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.repository.BandBioRepository;
+import org.example.eksamenbandbackend.repository.BandMemberRepository;
+import org.example.eksamenbandbackend.repository.ContactInfoRepository;
+import org.example.eksamenbandbackend.repository.PhotoRepository;
+import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.jspecify.annotations.NonNull;
 import org.example.eksamenbandbackend.service.UserService;
 import org.springframework.boot.CommandLineRunner;
