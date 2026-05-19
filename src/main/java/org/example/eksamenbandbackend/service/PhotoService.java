@@ -28,11 +28,10 @@ public class PhotoService {
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp");
 
+    private static final long MAX_UPLOAD_SIZE_BYTES = 30L * 1024 * 1024; // 30 MB
+
     @Value("${app.upload-dir}")
     private String uploadDir;
-
-    @Value("${app.max-upload-size-bytes:31457280}") // default 30MB
-    private long maxUploadSizeBytes;
 
     private final PhotoRepository photoRepository;
 
@@ -79,7 +78,7 @@ public class PhotoService {
             }
 
             // Enforce maximum file size
-            if (file.getSize() > maxUploadSizeBytes) {
+            if (file.getSize() > MAX_UPLOAD_SIZE_BYTES) {
                 errors.add(new UploadError(
                         file.getOriginalFilename(),
                         "File is too large: " + file.getSize() + " bytes"));
