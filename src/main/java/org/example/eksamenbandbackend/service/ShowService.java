@@ -1,6 +1,8 @@
 package org.example.eksamenbandbackend.service;
 
+import org.example.eksamenbandbackend.dto.CreateShowRequest;
 import org.example.eksamenbandbackend.dto.ShowResponse;
+import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.springframework.http.HttpStatus;
@@ -48,5 +50,23 @@ public class ShowService {
                     return ShowResponse.fromEntity(show, hasPhotos);
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
+    }
+
+    public Show createShow(CreateShowRequest request){
+        if (ifExistsByDate(request.date())){
+            throw new IllegalArgumentException("There is already a show on this date");
+        }
+
+        Show show = new Show();
+        show.setDate(request.date());
+        show.setCity(request.city());
+        show.setVenue(request.venue());
+        show.setTicketLink(request.ticketLink());
+
+        return showRepository.save(show);
+    }
+
+    public boolean ifExistsByDate(LocalDate date){
+        return showRepository.findByDate(date).isPresent();
     }
 }
