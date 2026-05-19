@@ -52,11 +52,7 @@ public class ShowService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
     }
 
-    public Show createUpcomingShow(CreateShowRequest request){
-        if (request.date().isBefore(LocalDate.now())){
-
-        }
-
+    public Show createShow(CreateShowRequest request){
         if (ifExistsByDate(request.date())){
             throw new IllegalArgumentException("There is already a show on this date");
         }
