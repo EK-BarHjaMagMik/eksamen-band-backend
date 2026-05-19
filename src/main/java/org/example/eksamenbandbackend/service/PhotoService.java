@@ -116,7 +116,7 @@ public class PhotoService {
     }
 
     public String saveFile(MultipartFile file) throws IOException {
-        Path dir = Paths.get(uploadDir);
+        Path dir = Paths.get(uploadDir.trim());
         Files.createDirectories(dir);
 
         String originalFilename = file.getOriginalFilename();
