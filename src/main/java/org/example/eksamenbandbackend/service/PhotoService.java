@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,9 @@ public class PhotoService {
 
     @Value("${app.upload-dir}")
     private String uploadDir;
+
+    @Value("${app.max-upload-size-bytes:31457280}") // default 30MB
+    private long maxUploadSizeBytes;
 
     private final PhotoRepository photoRepository;
 
@@ -66,6 +70,22 @@ public class PhotoService {
         List<UploadError> errors = new ArrayList<>();
 
         for (MultipartFile file : files) {
+            // Reject empty files
+            if (file.isEmpty()) {
+                errors.add(new UploadError(
+                        file.getOriginalFilename(),
+                        "File is empty"));
+                continue;
+            }
+
+            // Enforce maximum file size
+            if (file.getSize() > maxUploadSizeBytes) {
+                errors.add(new UploadError(
+                        file.getOriginalFilename(),
+                        "File is too large: " + file.getSize() + " bytes"));
+                continue;
+            }
+
             // Validate file type
             if (!ALLOWED_TYPES.contains(file.getContentType())) {
                 errors.add(new UploadError(
@@ -111,7 +131,9 @@ public class PhotoService {
         String filename = UUID.randomUUID() + fileExt;
         Path targetPath = dir.resolve(filename);
 
-        Files.copy(file.getInputStream(), targetPath);
+        try (InputStream in = file.getInputStream()) {
+            Files.copy(in, targetPath);
+        }
 
         return "/uploads/" + filename;
     }
