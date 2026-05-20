@@ -1,7 +1,6 @@
 package org.example.eksamenbandbackend.controller;
 
 import org.example.eksamenbandbackend.dto.CreateShowRequest;
-import org.example.eksamenbandbackend.dto.ShowResponse;
 import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.service.ShowService;
@@ -10,8 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -25,25 +25,25 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest // boots the full Spring application context
+@ActiveProfiles("test") // uses application-test.properties (H2 in-memory DB)
 public class AdminShowControllerTest {
 
-    private MockMvc mockMvc;
+    private MockMvc mockMvc; // simulates HTTP requests without a real server
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private WebApplicationContext webApplicationContext; // the full Spring web context, used to wire MockMvc
 
     @Autowired
-    private ShowRepository showRepository;
+    private ShowRepository showRepository; // real DB repo — used to set up and clean test data
 
-    @Autowired
-    private ShowService showService;
+    @MockitoBean
+    private ShowService showService; // replaces the real service bean with a Mockito mock
 
     @BeforeEach
     void setUp() {
+        // wires MockMvc into the real Spring web context
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
 
         showRepository.deleteAll();
 
@@ -54,29 +54,29 @@ public class AdminShowControllerTest {
         upcoming.setTicketLink("https://www.tapperiet.nu");
 
         showRepository.save(upcoming);
-
     }
 
     @Test
-    void shouldCreateShow() throws Exception{
-        /*when(showService.createShow(any(CreateShowRequest.class))).thenReturn();
+    void shouldCreateShow() throws Exception {
 
+        // tell the mock: when createShow is called with any CreateShowRequest, return an empty Show
+        when(showService.createShow(any(CreateShowRequest.class))).thenReturn(new Show());
+
+        // perform a POST to the endpoint with a JSON body matching CreateShowRequest fields
         mockMvc.perform(post("/api/admin/shows")
-                        .param("id", "2")
-                        .param("date", "2026-05-20")
-                        .param("city", "Køge")
-                        .param("venue", "Tapperiet")
-                        .param("ticketLink", "https://www.tapperiet.nu"))
-                .andExpect(status().is2xxSuccessful());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"date\":\"2026-05-20\",\"city\":\"Køge\",\"venue\":\"Tapperiet\",\"ticketLink\":\"https://www.tapperiet.nu\"}"))
+                  .andExpect(status().is2xxSuccessful()); // assert the controller returned a 200-range response
 
-        ArgumentCaptor<CreateShowRequest> createShowRequestArgumentCaptor = ArgumentCaptor.forClass(CreateShowRequest.class);
+        // set up a captor to intercept the exact argument passed to createShow
+        ArgumentCaptor<CreateShowRequest> captor = ArgumentCaptor.forClass(CreateShowRequest.class);
+        verify(showService).createShow(captor.capture()); // assert createShow was called exactly once, and capture what it received
 
-        verify(showService).createShow(createShowRequestArgumentCaptor.capture());
-
-        CreateShowRequest captured =createShowRequestArgumentCaptor.getValue();
-        assertThat(captured.date()).isEqualTo("2026-05-20");
+        CreateShowRequest captured = captor.getValue(); // retrieve the captured argument
+        // assert each field was correctly mapped from the JSON body to the CreateShowRequest
+        assertThat(captured.date()).isEqualTo(LocalDate.of(2026, 5, 20));
         assertThat(captured.city()).isEqualTo("Køge");
         assertThat(captured.venue()).isEqualTo("Tapperiet");
-        assertThat(captured.ticketLink()).isEqualTo("https://www.tapperiet.nu");*/ //TODO: fix test
+        assertThat(captured.ticketLink()).isEqualTo("https://www.tapperiet.nu");
     }
 }
