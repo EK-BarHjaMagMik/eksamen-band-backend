@@ -25,20 +25,20 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest // boots the full Spring application context
-@ActiveProfiles("test") // uses application-test.properties (H2 in-memory DB)
+@SpringBootTest
+@ActiveProfiles("test")
 public class AdminShowControllerTest {
 
-    private MockMvc mockMvc; // simulates HTTP requests without a real server
+    private MockMvc mockMvc;
 
     @Autowired
-    private WebApplicationContext webApplicationContext; // the full Spring web context, used to wire MockMvc
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private ShowRepository showRepository; // real DB repo — used to set up and clean test data
+    private ShowRepository showRepository;
 
     @MockitoBean
-    private ShowService showService; // replaces the real service bean with a Mockito mock
+    private ShowService showService;
 
     @BeforeEach
     void setUp() {
