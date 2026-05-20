@@ -18,10 +18,13 @@ profile:
 #  - name: <SomeEnabledInspectionId>
 
 #Disable inspections
-#exclude:
-#  - name: <SomeDisabledInspectionId>
-#    paths:
-#      - <path/where/not/run/inspection>
+exclude:
+  # `public static void main` is the universal Spring Boot convention; Java 25
+  # makes the `public` redundant, but removing it is unconventional and
+  # surprising. Suppressed only in the application entry-point.
+  - name: RedundantModifier
+    paths:
+      - src/main/java/org/example/eksamenbandbackend/EksamenBandBackendApplication.java
 
 projectJDK: "25" #(Applied in CI/CD pipeline)
 

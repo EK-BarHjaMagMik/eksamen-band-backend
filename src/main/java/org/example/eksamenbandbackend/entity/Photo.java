@@ -43,7 +43,7 @@ public class Photo {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "show_id", nullable = true, foreignKey = @ForeignKey(name = "fk_photo_show"))
+    @JoinColumn(name = "show_id", foreignKey = @ForeignKey(name = "fk_photo_show"))
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Show show;
 
