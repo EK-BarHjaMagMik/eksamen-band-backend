@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
 import org.example.eksamenbandbackend.entity.BandBio;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.BandBioRepository;
@@ -19,6 +19,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
+@NullMarked
 public class InitData implements CommandLineRunner {
 
     private final UserService userService;
@@ -37,7 +38,7 @@ public class InitData implements CommandLineRunner {
     }
 
     @Override
-    public void run(@NonNull String... args) {
+    public void run(String... args) {
         initAdmin();
         initShows();
         initSamplePhotos();
