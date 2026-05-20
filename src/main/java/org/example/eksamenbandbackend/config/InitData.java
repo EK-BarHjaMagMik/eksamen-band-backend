@@ -5,22 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
-import org.example.eksamenbandbackend.entity.BandBio;
-import org.example.eksamenbandbackend.entity.BandMember;
-import org.example.eksamenbandbackend.entity.ContactInfo;
-import org.example.eksamenbandbackend.entity.Photo;
-import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.entity.*;
 import org.example.eksamenbandbackend.repository.BandBioRepository;
 import org.example.eksamenbandbackend.repository.BandMemberRepository;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
-import org.jspecify.annotations.NonNull;
 import org.example.eksamenbandbackend.service.UserService;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
+@NullMarked
 public class InitData implements CommandLineRunner {
 
     private final UserService userService;
@@ -41,7 +38,7 @@ public class InitData implements CommandLineRunner {
     }
 
     @Override
-    public void run(@NonNull String... args) {
+    public void run(String... args) {
         initAdmin();
         initShows();
         initSamplePhotos();
@@ -179,7 +176,7 @@ public class InitData implements CommandLineRunner {
         m3.setRole("Guitar");
         m3.setBio("Andreas is the second guitarist of STÜGG, complementing Morten with his own unique style and contributing to the band's dynamic guitar work.");
         m3.setDisplayOrder(3);
-        
+
         BandMember m4 = new BandMember();
         m4.setName("Mikkel");
         m4.setRole("Bass");
