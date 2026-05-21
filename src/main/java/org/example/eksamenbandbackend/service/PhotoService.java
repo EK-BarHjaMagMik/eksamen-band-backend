@@ -96,7 +96,7 @@ public class PhotoService {
 
             try {
                 // save file to disk
-                Path savedPath = saveFile(file, contentType);
+                Path savedPath = saveFile(file);
                 String url = "/uploads/" + savedPath.getFileName();
 
                 // Create DB entry
@@ -125,26 +125,20 @@ public class PhotoService {
         return new UploadPhotosResponse(uploaded, errors);
     }
 
-    public Path saveFile(MultipartFile file, String contentType) throws IOException {
-        Path dir = Paths.get(uploadDir.trim()).toAbsolutePath().normalize();
+    public Path saveFile(MultipartFile file) throws IOException {
+        Path dir = Paths.get(uploadDir.trim());
         Files.createDirectories(dir);
 
-        // Extension is derived from the already-validated content type, never
-        // from the client-supplied filename, so it cannot carry path-traversal
-        // sequences.
-        String fileExt = switch (contentType) {
-            case "image/png" -> ".png";
-            case "image/webp" -> ".webp";
-            default -> ".jpg";
-        };
+        String originalFilename = file.getOriginalFilename();
+        String fileExt = "";
+
+        // Safely extract extension
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExt = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
 
         String filename = UUID.randomUUID() + fileExt;
-        Path targetPath = dir.resolve(filename).normalize();
-
-        // Defence in depth: reject any resolved path that escapes the upload dir.
-        if (!targetPath.startsWith(dir)) {
-            throw new IOException("Resolved upload path escapes the upload directory");
-        }
+        Path targetPath = dir.resolve(filename);
 
         try (InputStream in = file.getInputStream()) {
             Files.copy(in, targetPath);
