@@ -30,5 +30,6 @@ public class Show {
     @Column(nullable = false)
     private String venue;
 
+    @Column(length = 2048)
     private String ticketLink;
 }
