@@ -6,6 +6,7 @@ import java.util.List;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
 import org.example.eksamenbandbackend.service.PhotoService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,6 @@ public class AdminPhotoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTaken) {
         return new ResponseEntity<>(
                 photoService.uploadPhotos(files, caption, photographer, dateTaken),
-                org.springframework.http.HttpStatus.OK);
+                HttpStatus.OK);
     }
 }
