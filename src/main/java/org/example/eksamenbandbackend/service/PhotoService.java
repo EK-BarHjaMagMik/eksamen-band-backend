@@ -86,10 +86,11 @@ public class PhotoService {
             }
 
             // Validate file type
-            if (!ALLOWED_TYPES.contains(file.getContentType())) {
+            String contentType = file.getContentType();
+            if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
                 errors.add(new UploadError(
                         file.getOriginalFilename(),
-                        "Unsupported file type: " + file.getContentType()));
+                        "Unsupported file type: " + contentType));
                 continue;
             }
 
