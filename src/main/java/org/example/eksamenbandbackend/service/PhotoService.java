@@ -126,7 +126,7 @@ public class PhotoService {
     }
 
     public Path saveFile(MultipartFile file, String contentType) throws IOException {
-        Path dir = Paths.get(uploadDir.trim());
+        Path dir = Paths.get(uploadDir.trim()).toAbsolutePath().normalize();
         Files.createDirectories(dir);
 
         // Extension is derived from the already-validated content type, never
@@ -139,7 +139,12 @@ public class PhotoService {
         };
 
         String filename = UUID.randomUUID() + fileExt;
-        Path targetPath = dir.resolve(filename);
+        Path targetPath = dir.resolve(filename).normalize();
+
+        // Defence in depth: reject any resolved path that escapes the upload dir.
+        if (!targetPath.startsWith(dir)) {
+            throw new IOException("Resolved upload path escapes the upload directory");
+        }
 
         try (InputStream in = file.getInputStream()) {
             Files.copy(in, targetPath);
