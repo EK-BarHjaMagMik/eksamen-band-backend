@@ -96,7 +96,7 @@ public class PhotoService {
 
             try {
                 // save file to disk
-                Path savedPath = saveFile(file);
+                Path savedPath = saveFile(file, contentType);
                 String url = "/uploads/" + savedPath.getFileName();
 
                 // Create DB entry
@@ -125,17 +125,18 @@ public class PhotoService {
         return new UploadPhotosResponse(uploaded, errors);
     }
 
-    public Path saveFile(MultipartFile file) throws IOException {
+    public Path saveFile(MultipartFile file, String contentType) throws IOException {
         Path dir = Paths.get(uploadDir.trim());
         Files.createDirectories(dir);
 
-        String originalFilename = file.getOriginalFilename();
-        String fileExt = "";
-
-        // Safely extract extension
-        if (originalFilename != null && originalFilename.contains(".")) {
-            fileExt = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
+        // Extension is derived from the already-validated content type, never
+        // from the client-supplied filename, so it cannot carry path-traversal
+        // sequences.
+        String fileExt = switch (contentType) {
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            default -> ".jpg";
+        };
 
         String filename = UUID.randomUUID() + fileExt;
         Path targetPath = dir.resolve(filename);
