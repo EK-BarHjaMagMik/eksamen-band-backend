@@ -95,8 +95,9 @@ public class PhotoService {
             }
 
             try {
-                // save file to disk and get URL
-                String url = saveFile(file);
+                // save file to disk
+                Path savedPath = saveFile(file);
+                String url = "/uploads/" + savedPath.getFileName();
 
                 // Create DB entry
                 Photo photo = new Photo();
@@ -104,7 +105,15 @@ public class PhotoService {
                 photo.setCaption(caption);
                 photo.setPhotographer(photographer);
                 photo.setDateTaken(dateTaken != null ? dateTaken : LocalDate.now());
-                photoRepository.save(photo);
+
+                try {
+                    photoRepository.save(photo);
+                } catch (RuntimeException e) {
+                    // DB write failed — remove the orphaned file and keep the batch going
+                    Files.deleteIfExists(savedPath);
+                    errors.add(new UploadError(file.getOriginalFilename(), "Failed to save photo"));
+                    continue;
+                }
 
                 uploaded.add(new UploadedPhoto(photo.getId(), url));
 
@@ -116,7 +125,7 @@ public class PhotoService {
         return new UploadPhotosResponse(uploaded, errors);
     }
 
-    public String saveFile(MultipartFile file) throws IOException {
+    public Path saveFile(MultipartFile file) throws IOException {
         Path dir = Paths.get(uploadDir.trim());
         Files.createDirectories(dir);
 
@@ -135,7 +144,7 @@ public class PhotoService {
             Files.copy(in, targetPath);
         }
 
-        return "/uploads/" + filename;
+        return targetPath;
     }
 
 }
