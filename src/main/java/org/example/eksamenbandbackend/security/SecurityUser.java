@@ -4,6 +4,7 @@ import org.example.eksamenbandbackend.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +18,7 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         // Normalize the stored role so both "ADMIN" and "ROLE_ADMIN" work with
         // Spring Security role checks such as hasRole("ADMIN").
         return List.of(new SimpleGrantedAuthority(normalizeRole(user.getRole())));
@@ -34,7 +35,7 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return user.getUsername();
     }
 
