@@ -10,6 +10,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -79,5 +85,102 @@ class PhotoServiceTest {
         Pageable used = captor.getValue();
         assertEquals(0, used.getPageNumber());
         assertEquals(limit, used.getPageSize());
+    }
+
+    @Test
+    void uploadPhotos_savesFileAndCreatesDbEntry(@TempDir Path tempDir) throws Exception {
+        // arrange
+        // set upload dir
+        var f = PhotoService.class.getDeclaredField("uploadDir");
+        f.setAccessible(true);
+        f.set(photoService, tempDir.toString());
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(5L);
+        when(file.getContentType()).thenReturn("image/jpeg");
+        when(file.getOriginalFilename()).thenReturn("photo.jpg");
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1,2,3}));
+
+        // act
+        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026,5,1));
+
+        // assert
+        assertEquals(1, resp.uploaded().size());
+        assertTrue(resp.errors().isEmpty());
+
+        ArgumentCaptor<org.example.eksamenbandbackend.entity.Photo> captor = ArgumentCaptor.forClass(org.example.eksamenbandbackend.entity.Photo.class);
+        verify(photoRepository).save(captor.capture());
+        var saved = captor.getValue();
+        assertEquals("caption", saved.getCaption());
+        assertEquals("photog", saved.getPhotographer());
+        assertEquals(LocalDate.of(2026,5,1), saved.getDateTaken());
+
+        // file exists in upload dir
+        var files = java.util.Arrays.stream(tempDir.toFile().listFiles()).map(java.io.File::getName).toList();
+        assertFalse(files.isEmpty());
+        assertTrue(files.get(0).endsWith(".jpg"));
+    }
+
+    @Test
+    void uploadPhotos_reportsEmptyFile() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(true);
+        when(file.getOriginalFilename()).thenReturn("empty.jpg");
+
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+
+        assertTrue(resp.uploaded().isEmpty());
+        assertEquals(1, resp.errors().size());
+        assertEquals("empty.jpg", resp.errors().get(0).filename());
+    }
+
+    @Test
+    void uploadPhotos_reportsUnsupportedType() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(10L);
+        when(file.getContentType()).thenReturn("application/pdf");
+        when(file.getOriginalFilename()).thenReturn("doc.pdf");
+
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+
+        assertTrue(resp.uploaded().isEmpty());
+        assertEquals(1, resp.errors().size());
+        assertTrue(resp.errors().get(0).reason().contains("Unsupported file type"));
+    }
+
+    @Test
+    void uploadPhotos_reportsTooLargeFile() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(30L * 1024 * 1024 + 1);
+        when(file.getOriginalFilename()).thenReturn("big.jpg");
+
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+
+        assertTrue(resp.uploaded().isEmpty());
+        assertEquals(1, resp.errors().size());
+        assertTrue(resp.errors().get(0).reason().contains("too large") || resp.errors().get(0).reason().contains("too large") );
+    }
+
+    @Test
+    void uploadPhotos_handlesIOExceptionWhenSaving(@TempDir Path tempDir) throws Exception {
+        var f = PhotoService.class.getDeclaredField("uploadDir");
+        f.setAccessible(true);
+        f.set(photoService, tempDir.toString());
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(5L);
+        when(file.getContentType()).thenReturn("image/jpeg");
+        when(file.getOriginalFilename()).thenReturn("io.jpg");
+        when(file.getInputStream()).thenThrow(new IOException("disk error"));
+
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+
+        assertTrue(resp.uploaded().isEmpty());
+        assertEquals(1, resp.errors().size());
+        assertTrue(resp.errors().get(0).reason().contains("Failed to save file"));
     }
 }
