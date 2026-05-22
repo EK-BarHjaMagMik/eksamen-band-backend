@@ -9,7 +9,8 @@ public record PhotoResponse(
         String url,
         String caption,
         LocalDate dateTaken,
-        String photographer) {
+        String photographer,
+        ShowResponse show) {
 
     public static PhotoResponse fromEntity(Photo photo) {
         return new PhotoResponse(
@@ -17,6 +18,10 @@ public record PhotoResponse(
                 photo.getUrl(),
                 photo.getCaption(),
                 photo.getDateTaken(),
-                photo.getPhotographer());
+                photo.getPhotographer(),
+                photo.getShow() != null
+                        ? ShowResponse.fromEntity(photo.getShow(), true)
+                        : null
+        );
     }
 }
