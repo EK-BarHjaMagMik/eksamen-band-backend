@@ -49,12 +49,13 @@ public class ShowService {
                     boolean hasPhotos = photoRepository.existsByShowId(show.getId());
                     return ShowResponse.fromEntity(show, hasPhotos);
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
     }
 
-    public Show createShow(CreateShowRequest request){
-        if (ifExistsByDate(request.date())){
-            throw new IllegalArgumentException("There is already a show on this date");
+    public Show createShow(CreateShowRequest request) {
+        if (existsByDate(request.date())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a show on this date");
         }
 
         Show show = new Show();
@@ -66,7 +67,37 @@ public class ShowService {
         return showRepository.save(show);
     }
 
-    public boolean ifExistsByDate(LocalDate date){
-        return showRepository.findByDate(date).isPresent();
+    public boolean existsByDate(LocalDate date) {
+        return showRepository.existsByDate(date);
+    }
+
+    public ShowResponse editShowById(Long showId, CreateShowRequest request) {
+        Show show = showRepository.findById(showId)
+                .map(existingShow -> {
+                    // if the dates are not the same and there is already a show on the new date, we
+                    // throw an exception
+                    // allowing us to change other fields than date without having to worry about
+                    // the date conflict
+                    if (!existingShow.getDate().equals(request.date()) && existsByDate(request.date())) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a show on this date");
+                    }
+                    existingShow.setDate(request.date());
+                    existingShow.setCity(request.city());
+                    existingShow.setVenue(request.venue());
+                    existingShow.setTicketLink(request.ticketLink());
+                    return existingShow;
+                })
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
+        showRepository.save(show);
+        boolean hasPhotos = photoRepository.existsByShowId(show.getId());
+        return ShowResponse.fromEntity(show, hasPhotos);
+    }
+
+    public void deleteShowById(Long showId) {
+        Show show = showRepository.findById(showId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
+        showRepository.delete(show);
     }
 }
