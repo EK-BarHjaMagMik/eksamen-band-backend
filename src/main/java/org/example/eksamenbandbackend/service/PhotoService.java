@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -147,4 +148,35 @@ public class PhotoService {
         return targetPath;
     }
 
+    public boolean deletePhoto(Long id) {
+        Optional<Photo> optional = photoRepository.findById(id);
+
+        if (optional.isEmpty()) {
+            return false;
+        }
+
+        Photo photo = optional.get();
+
+        // 1. Delete file from storage
+        deleteFileFromDisk(photo.getUrl());
+
+        // 2. Delete DB record
+        photoRepository.delete(photo);
+
+        return true;
+    }
+
+    private void deleteFileFromDisk(String url) {
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        
+        String filename = Paths.get(url).getFileName().toString();
+        Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
+        
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + filePath, e);}
+    }
 }
