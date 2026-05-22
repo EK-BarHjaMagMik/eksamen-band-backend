@@ -54,8 +54,8 @@ public class ShowService {
     }
 
     public Show createShow(CreateShowRequest request) {
-        if (ifExistsByDate(request.date())) {
-            throw new IllegalArgumentException("There is already a show on this date");
+        if (existsByDate(request.date())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a show on this date");
         }
 
         Show show = new Show();
@@ -67,8 +67,8 @@ public class ShowService {
         return showRepository.save(show);
     }
 
-    public boolean ifExistsByDate(LocalDate date) {
-        return showRepository.findByDate(date).isPresent();
+    public boolean existsByDate(LocalDate date) {
+        return showRepository.existsByDate(date);
     }
 
     public ShowResponse editShowById(Long showId, CreateShowRequest request) {
@@ -78,8 +78,8 @@ public class ShowService {
                     // throw an exception
                     // allowing us to change other fields than date without having to worry about
                     // the date conflict
-                    if (!existingShow.getDate().equals(request.date()) && ifExistsByDate(request.date())) {
-                        throw new IllegalArgumentException("There is already a show on this date");
+                    if (!existingShow.getDate().equals(request.date()) && existsByDate(request.date())) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a show on this date");
                     }
                     existingShow.setDate(request.date());
                     existingShow.setCity(request.city());

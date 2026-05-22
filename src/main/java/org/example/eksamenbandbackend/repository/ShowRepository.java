@@ -13,4 +13,6 @@ public interface ShowRepository extends JpaRepository<Show, Long> {
     List<Show> findByDateLessThanEqualOrderByDateDesc(LocalDate date);
 
     Optional<Show> findByDate(LocalDate date);
+
+    boolean existsByDate(LocalDate date);
 }
