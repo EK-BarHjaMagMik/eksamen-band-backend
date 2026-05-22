@@ -5,6 +5,7 @@ import java.util.List;
 import org.example.eksamenbandbackend.entity.Photo;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 

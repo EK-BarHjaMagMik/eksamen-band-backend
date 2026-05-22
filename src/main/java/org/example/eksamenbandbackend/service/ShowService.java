@@ -69,4 +69,10 @@ public class ShowService {
     public boolean ifExistsByDate(LocalDate date){
         return showRepository.findByDate(date).isPresent();
     }
+
+    public void deleteShowById(Long showId) {
+        Show show = showRepository.findById(showId)
+           .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
+        showRepository.delete(show);
+    }
 }
