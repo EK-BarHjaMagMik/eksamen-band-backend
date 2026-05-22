@@ -31,7 +31,7 @@ class PhotoRepositoryTest {
     }
 
     @Test
-    void findAllByOrderByDateTakenDesc_returnsPhotosSortedByDateDesc() {
+    void findAllByOrderByDateTakenDescCreatedAtDesc_returnsPhotosSortedByDateDesc() {
         Photo p1 = new Photo();
         p1.setUrl("/a.jpg");
         p1.setCaption("A");
@@ -49,7 +49,7 @@ class PhotoRepositoryTest {
 
         photoRepository.saveAll(List.of(p1, p2, p3));
 
-        List<Photo> all = photoRepository.findAllByOrderByDateTakenDesc();
+        List<Photo> all = photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc();
 
         assertThat(all).hasSize(3);
         assertThat(all.get(0).getDateTaken()).isAfter(all.get(1).getDateTaken());
@@ -57,7 +57,7 @@ class PhotoRepositoryTest {
     }
 
     @Test
-    void findAllByOrderByDateTakenDesc_withPageable_appliesLimit() {
+    void findAllByOrderByDateTakenDescCreatedAtDesc_withPageable_appliesLimit() {
         Photo p1 = new Photo();
         p1.setUrl("/a.jpg");
         p1.setCaption("A");
@@ -75,7 +75,7 @@ class PhotoRepositoryTest {
 
         photoRepository.saveAll(List.of(p1, p2, p3));
 
-        List<Photo> top2 = photoRepository.findAllByOrderByDateTakenDesc(PageRequest.of(0, 2));
+        List<Photo> top2 = photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc(PageRequest.of(0, 2));
 
         assertThat(top2).hasSize(2);
         assertThat(top2.get(0).getDateTaken()).isAfter(top2.get(1).getDateTaken());

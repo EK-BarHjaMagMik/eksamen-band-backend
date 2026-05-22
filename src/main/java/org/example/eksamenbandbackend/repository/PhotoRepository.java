@@ -8,12 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
-    List<Photo> findAllByOrderByDateTakenDesc();
+    List<Photo> findAllByOrderByDateTakenDescCreatedAtDesc();
 
     // dynamic limit via Pageable: use PageRequest.of(0, limit)
-    List<Photo> findAllByOrderByDateTakenDesc(Pageable pageable);
+    List<Photo> findAllByOrderByDateTakenDescCreatedAtDesc(Pageable pageable);
 
     boolean existsByShowId(Long showId);
 
-    List<Photo> findAllByShowIdOrderByDateTakenDesc(Long showId);
+    List<Photo> findAllByShowIdOrderByDateTakenDescCreatedAtDesc(Long showId);
 }

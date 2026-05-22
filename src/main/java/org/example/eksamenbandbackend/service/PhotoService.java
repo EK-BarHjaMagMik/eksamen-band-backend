@@ -43,21 +43,21 @@ public class PhotoService {
     }
 
     public List<PhotoResponse> getPhotos() {
-        return photoRepository.findAllByOrderByDateTakenDesc().stream()
+        return photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc().stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
 
     public List<PhotoResponse> getRecentPhotos(int limit) {
         return photoRepository
-                .findAllByOrderByDateTakenDesc(PageRequest.of(0, Math.max(1, limit)))
+                .findAllByOrderByDateTakenDescCreatedAtDesc(PageRequest.of(0, Math.max(1, limit)))
                 .stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
 
     public List<PhotoResponse> getPhotosByShowId(Long showId) {
-        return photoRepository.findAllByShowIdOrderByDateTakenDesc(showId).stream()
+        return photoRepository.findAllByShowIdOrderByDateTakenDescCreatedAtDesc(showId).stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
