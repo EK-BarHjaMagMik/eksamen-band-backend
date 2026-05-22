@@ -158,12 +158,13 @@ public class PhotoService {
         }
 
         Photo photo = optional.get();
+        String url = photo.getUrl();
 
-        // 1. Delete file from storage
-        deleteFileFromDisk(photo.getUrl());
-
-        // 2. Delete DB record
+        // 1. Delete DB record
         photoRepository.delete(photo);
+
+        // 2. Delete file from storage — a failure here leaves a harmless orphan file
+        deleteFileFromDisk(url);
 
         return true;
     }
@@ -182,7 +183,7 @@ public class PhotoService {
             System.err.println("Failed to delete file: " + filePath + " - " + e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to delete file: " + filePath,
+                    "Failed to delete photo file",
                     e);
         }
     }

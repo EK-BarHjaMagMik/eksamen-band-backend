@@ -14,5 +14,7 @@ public interface ShowRepository extends JpaRepository<Show, Long> {
 
     Optional<Show> findByDate(LocalDate date);
 
+    Optional<Show> findByVenue(String venue);
+
     boolean existsByDate(LocalDate date);
 }
