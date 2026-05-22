@@ -70,7 +70,7 @@ public class ShowService {
         return showRepository.findByDate(date).isPresent();
     }
 
-    public Show editShowById(Long showId, CreateShowRequest request) {
+    public ShowResponse editShowById(Long showId, CreateShowRequest request) {
         Show show = showRepository.findById(showId)
                 .map(existingShow -> {
                     // if the dates are not the same and there is already a show on the new date, we throw an exception
@@ -86,7 +86,8 @@ public class ShowService {
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Show not found with id: " + showId));
         showRepository.save(show);
-        return show;
+        boolean hasPhotos = photoRepository.existsByShowId(show.getId());
+        return ShowResponse.fromEntity(show, hasPhotos);
     }
 
     public void deleteShowById(Long showId) {

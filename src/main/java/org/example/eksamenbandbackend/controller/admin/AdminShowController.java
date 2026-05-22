@@ -13,14 +13,20 @@ public class AdminShowController {
 
     private final ShowService showService;
 
-    public AdminShowController(ShowService showService){
+    public AdminShowController(ShowService showService) {
         this.showService = showService;
     }
 
     @PostMapping
-    public ResponseEntity<ShowResponse> createShow(@RequestBody CreateShowRequest request){
+    public ResponseEntity<ShowResponse> createShow(@RequestBody CreateShowRequest request) {
         Show show = showService.createShow(request);
         return ResponseEntity.ok(ShowResponse.fromEntity(show, false));
+    }
+
+    @PutMapping("/{showId}")
+    public ResponseEntity<ShowResponse> updateShow(@PathVariable Long showId, @RequestBody CreateShowRequest request) {
+    ShowResponse showResponse = showService.editShowById(showId, request);
+        return ResponseEntity.ok(showResponse);
     }
 
     @DeleteMapping("/{showId}")
