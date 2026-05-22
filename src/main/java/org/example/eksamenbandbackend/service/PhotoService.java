@@ -20,8 +20,10 @@ import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PhotoService {
@@ -170,13 +172,18 @@ public class PhotoService {
         if (url == null || url.isEmpty()) {
             return;
         }
-        
+
         String filename = Paths.get(url).getFileName().toString();
         Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
-        
+
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete file: " + filePath, e);}
+            System.err.println("Failed to delete file: " + filePath + " - " + e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to delete file: " + filePath,
+                    e);
+        }
     }
 }
