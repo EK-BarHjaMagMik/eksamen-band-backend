@@ -1,35 +1,46 @@
 package org.example.eksamenbandbackend.config;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
+import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
 import org.example.eksamenbandbackend.entity.*;
 import org.example.eksamenbandbackend.repository.BandBioRepository;
 import org.example.eksamenbandbackend.repository.BandMemberRepository;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
+import org.example.eksamenbandbackend.service.PhotoService;
 import org.example.eksamenbandbackend.service.UserService;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
 @Component
 @NullMarked
 public class InitData implements CommandLineRunner {
 
     private final UserService userService;
+    private final PhotoService photoService;
+
     private final PhotoRepository photoRepository;
     private final ShowRepository showRepository;
     private final ContactInfoRepository contactInfoRepository;
     private final BandBioRepository bandBioRepository;
     private final BandMemberRepository bandMemberRepository;
 
-    public InitData(UserService userService, PhotoRepository photoRepository, ShowRepository showRepository,
-            ContactInfoRepository contactInfoRepository, BandBioRepository bandBioRepository, BandMemberRepository bandMemberRepository) {
+    public InitData(UserService userService, PhotoService photoService, PhotoRepository photoRepository,
+            ShowRepository showRepository,
+            ContactInfoRepository contactInfoRepository, BandBioRepository bandBioRepository,
+            BandMemberRepository bandMemberRepository) {
         this.userService = userService;
+        this.photoService = photoService;
         this.photoRepository = photoRepository;
         this.showRepository = showRepository;
         this.contactInfoRepository = contactInfoRepository;
@@ -104,32 +115,34 @@ public class InitData implements CommandLineRunner {
             return;
         }
 
-        List<Photo> photos = new ArrayList<>();
+        List<MultipartFile> files = new ArrayList<>();
 
-        for (int i = 1; i <= 10; i++) {
-            photos.add(createPhoto(
-                    "/sample-photos/photo" + i + ".jpg",
-                    "Sample caption " + i,
-                    "Photographer " + i));
+        try {
+            for (int i = 1; i <= 10; i++) {
+                files.add(loadSampleFile("photo" + i + ".jpg"));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load sample photos", e);
         }
+
+        UploadPhotosResponse response = photoService.uploadPhotos(
+                files,
+                "Sample caption",
+                "Sample photographer",
+                LocalDate.now());
 
         // Link last 5 photos to the UHØRT show
-        for (int i = 6; i <= 10; i++) {
-            photos.get(i-1).setShow(showRepository.findById(6L).orElse(null)); 
-        }
+        var show = showRepository.findByVenue("UHØRT").orElse(null);
 
-        photoRepository.saveAll(photos);
+        response.uploaded().stream()
+                .skip(5) // last 5
+                .forEach(uploaded -> {
+                    Photo p = photoRepository.findById(uploaded.id()).orElseThrow();
+                    p.setShow(show);
+                    photoRepository.save(p);
+                });
 
         System.out.println("10 sample photos initialized");
-    }
-
-    private Photo createPhoto(String url, String caption, String photographer) {
-        Photo p = new Photo();
-        p.setUrl(url);
-        p.setCaption(caption);
-        p.setPhotographer(photographer);
-        p.setDateTaken(LocalDate.now());
-        return p;
     }
 
     private void initBandBio() {
@@ -162,31 +175,36 @@ public class InitData implements CommandLineRunner {
         BandMember m1 = new BandMember();
         m1.setName("Kasper");
         m1.setRole("Vocals");
-        m1.setBio("Kasper is the lead vocalist of STÜGG, known for his powerful and versatile voice that can switch between clean singing, screaming, and growling with ease.");
+        m1.setBio(
+                "Kasper is the lead vocalist of STÜGG, known for his powerful and versatile voice that can switch between clean singing, screaming, and growling with ease.");
         m1.setDisplayOrder(1);
 
         BandMember m2 = new BandMember();
         m2.setName("Morten");
         m2.setRole("Guitar");
-        m2.setBio("Morten is the guitarist of STÜGG, responsible for crafting the band's heavy riffs and melodic solos that define their sound.");
+        m2.setBio(
+                "Morten is the guitarist of STÜGG, responsible for crafting the band's heavy riffs and melodic solos that define their sound.");
         m2.setDisplayOrder(2);
 
         BandMember m3 = new BandMember();
         m3.setName("Andreas");
         m3.setRole("Guitar");
-        m3.setBio("Andreas is the second guitarist of STÜGG, complementing Morten with his own unique style and contributing to the band's dynamic guitar work.");
+        m3.setBio(
+                "Andreas is the second guitarist of STÜGG, complementing Morten with his own unique style and contributing to the band's dynamic guitar work.");
         m3.setDisplayOrder(3);
 
         BandMember m4 = new BandMember();
         m4.setName("Mikkel");
         m4.setRole("Bass");
-        m4.setBio("Mikkel is the bassist of STÜGG, providing the low-end foundation and groove that drives the band's heavy sound.");
+        m4.setBio(
+                "Mikkel is the bassist of STÜGG, providing the low-end foundation and groove that drives the band's heavy sound.");
         m4.setDisplayOrder(4);
 
         BandMember m5 = new BandMember();
         m5.setName("Gustav");
         m5.setRole("Drums");
-        m5.setBio("Gustav is the drummer of STÜGG, known for his powerful and precise drumming style that adds intensity and energy to the band's music.");
+        m5.setBio(
+                "Gustav is the drummer of STÜGG, known for his powerful and precise drumming style that adds intensity and energy to the band's music.");
         m5.setDisplayOrder(5);
         bandMemberRepository.saveAll(List.of(m1, m2, m3, m4, m5));
         System.out.println("BandMembers initialized");
@@ -217,4 +235,20 @@ public class InitData implements CommandLineRunner {
         System.out.println(isNew ? "Contact info initialized" : "Contact info updated with bookingEmail");
     }
 
+    private MultipartFile loadSampleFile(String filename) throws IOException {
+        ClassPathResource resource = new ClassPathResource("sample-photos/" + filename);
+
+        String contentType = switch (filename.substring(filename.lastIndexOf('.') + 1).toLowerCase()) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "webp" -> "image/webp";
+            default -> "application/octet-stream";
+        };
+
+        return new MockMultipartFile(
+                filename,
+                filename,
+                contentType,
+                resource.getInputStream());
+    }
 }

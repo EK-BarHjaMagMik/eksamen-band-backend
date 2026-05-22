@@ -25,7 +25,7 @@ public class AdminShowController {
 
     @PutMapping("/{showId}")
     public ResponseEntity<ShowResponse> updateShow(@PathVariable Long showId, @RequestBody CreateShowRequest request) {
-    ShowResponse showResponse = showService.editShowById(showId, request);
+        ShowResponse showResponse = showService.editShowById(showId, request);
         return ResponseEntity.ok(showResponse);
     }
 

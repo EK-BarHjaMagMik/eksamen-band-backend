@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,8 +20,10 @@ import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PhotoService {
@@ -40,21 +43,21 @@ public class PhotoService {
     }
 
     public List<PhotoResponse> getPhotos() {
-        return photoRepository.findAllByOrderByDateTakenDesc().stream()
+        return photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc().stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
 
     public List<PhotoResponse> getRecentPhotos(int limit) {
         return photoRepository
-                .findAllByOrderByDateTakenDesc(PageRequest.of(0, Math.max(1, limit)))
+                .findAllByOrderByDateTakenDescCreatedAtDesc(PageRequest.of(0, Math.max(1, limit)))
                 .stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
 
     public List<PhotoResponse> getPhotosByShowId(Long showId) {
-        return photoRepository.findAllByShowIdOrderByDateTakenDesc(showId).stream()
+        return photoRepository.findAllByShowIdOrderByDateTakenDescCreatedAtDesc(showId).stream()
                 .map(PhotoResponse::fromEntity)
                 .toList();
     }
@@ -147,4 +150,41 @@ public class PhotoService {
         return targetPath;
     }
 
+    public boolean deletePhoto(Long id) {
+        Optional<Photo> optional = photoRepository.findById(id);
+
+        if (optional.isEmpty()) {
+            return false;
+        }
+
+        Photo photo = optional.get();
+        String url = photo.getUrl();
+
+        // 1. Delete DB record
+        photoRepository.delete(photo);
+
+        // 2. Delete file from storage — a failure here leaves a harmless orphan file
+        deleteFileFromDisk(url);
+
+        return true;
+    }
+
+    private void deleteFileFromDisk(String url) {
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+
+        String filename = Paths.get(url).getFileName().toString();
+        Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
+
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            System.err.println("Failed to delete file: " + filePath + " - " + e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to delete photo file",
+                    e);
+        }
+    }
 }

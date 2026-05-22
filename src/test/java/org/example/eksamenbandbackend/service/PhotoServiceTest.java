@@ -52,7 +52,7 @@ class PhotoServiceTest {
         p2.setDateTaken(LocalDate.of(2026, 1, 1));
         p2.setPhotographer("ph2");
 
-        when(photoRepository.findAllByOrderByDateTakenDesc()).thenReturn(List.of(p1, p2));
+        when(photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc()).thenReturn(List.of(p1, p2));
 
         List<PhotoResponse> res = photoService.getPhotos();
 
@@ -73,7 +73,7 @@ class PhotoServiceTest {
         p.setDateTaken(LocalDate.of(2026, 2, 1));
         p.setPhotographer("phx");
 
-        when(photoRepository.findAllByOrderByDateTakenDesc(any(Pageable.class))).thenReturn(List.of(p));
+        when(photoRepository.findAllByOrderByDateTakenDescCreatedAtDesc(any(Pageable.class))).thenReturn(List.of(p));
 
         List<PhotoResponse> res = photoService.getRecentPhotos(limit);
 
@@ -81,7 +81,7 @@ class PhotoServiceTest {
         assertEquals(p.getId(), res.get(0).id());
 
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
-        verify(photoRepository).findAllByOrderByDateTakenDesc(captor.capture());
+        verify(photoRepository).findAllByOrderByDateTakenDescCreatedAtDesc(captor.capture());
         Pageable used = captor.getValue();
         assertEquals(0, used.getPageNumber());
         assertEquals(limit, used.getPageSize());
