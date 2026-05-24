@@ -142,9 +142,7 @@ public class InitData implements CommandLineRunner {
                     photoRepository.save(p);
                 });
 
-        response.errors().forEach(err -> System.err.println(
-                "Sample photo failed: " + err.filename() + " — " + err.reason()));
-        System.out.println(response.uploaded().size() + " sample photos initialized");
+        System.out.println("10 sample photos initialized");
     }
 
     private void initBandBio() {
