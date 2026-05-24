@@ -21,6 +21,7 @@ WORKDIR /app
 
 # Run as a non-root user.
 RUN useradd --system --no-create-home --shell /usr/sbin/nologin appuser
+RUN mkdir -p /var/lib/stugg/uploads && chown -R appuser:appuser /var/lib/stugg/uploads
 USER appuser
 
 COPY --from=build /app/target/app.jar app.jar
