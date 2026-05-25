@@ -18,6 +18,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,7 +42,7 @@ class AdminPhotoControllerTest {
         UploadPhotosResponse.UploadedPhoto up = new UploadPhotosResponse.UploadedPhoto(1L, "/uploads/photo.jpg");
         UploadPhotosResponse resp = new UploadPhotosResponse(List.of(up), List.of());
 
-        when(photoService.uploadPhotos(anyList(), anyString(), anyString(), any())).thenReturn(resp);
+        when(photoService.uploadPhotos(anyList(), anyString(), anyString(), any(), isNull())).thenReturn(resp);
 
         MockMultipartFile file = new MockMultipartFile("files", "photo.jpg", "image/jpeg", "imgdata".getBytes());
 
@@ -62,7 +63,7 @@ class AdminPhotoControllerTest {
         UploadPhotosResponse.UploadError err = new UploadPhotosResponse.UploadError("bad.jpg", "Unsupported file type");
         UploadPhotosResponse resp = new UploadPhotosResponse(List.of(), List.of(err));
 
-        when(photoService.uploadPhotos(anyList(), any(), any(), any())).thenReturn(resp);
+        when(photoService.uploadPhotos(anyList(), isNull(), isNull(), isNull(), isNull())).thenReturn(resp);
 
         MockMultipartFile file = new MockMultipartFile("files", "bad.jpg", "application/pdf", "pdfdata".getBytes());
 

@@ -2,6 +2,7 @@ package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
+import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,14 @@ class PhotoServiceTest {
     @Mock
     private PhotoRepository photoRepository;
 
+    @Mock
+    private ShowRepository showRepository;
+
     private PhotoService photoService;
 
     @BeforeEach
     void setUp() {
-        photoService = new PhotoService(photoRepository);
+        photoService = new PhotoService(photoRepository, showRepository);
     }
 
     @Test
@@ -103,7 +107,7 @@ class PhotoServiceTest {
         when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1,2,3}));
 
         // act
-        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026,5,1));
+        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026,5,1), null);
 
         // assert
         assertEquals(1, resp.uploaded().size());
@@ -128,7 +132,7 @@ class PhotoServiceTest {
         when(file.isEmpty()).thenReturn(true);
         when(file.getOriginalFilename()).thenReturn("empty.jpg");
 
-        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null, null);
 
         assertTrue(resp.uploaded().isEmpty());
         assertEquals(1, resp.errors().size());
@@ -143,7 +147,7 @@ class PhotoServiceTest {
         when(file.getContentType()).thenReturn("application/pdf");
         when(file.getOriginalFilename()).thenReturn("doc.pdf");
 
-        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null, null);
 
         assertTrue(resp.uploaded().isEmpty());
         assertEquals(1, resp.errors().size());
@@ -157,7 +161,7 @@ class PhotoServiceTest {
         when(file.getSize()).thenReturn(30L * 1024 * 1024 + 1);
         when(file.getOriginalFilename()).thenReturn("big.jpg");
 
-        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null, null);
 
         assertTrue(resp.uploaded().isEmpty());
         assertEquals(1, resp.errors().size());
@@ -177,7 +181,7 @@ class PhotoServiceTest {
         when(file.getOriginalFilename()).thenReturn("io.jpg");
         when(file.getInputStream()).thenThrow(new IOException("disk error"));
 
-        var resp = photoService.uploadPhotos(List.of(file), null, null, null);
+        var resp = photoService.uploadPhotos(List.of(file), null, null, null, null);
 
         assertTrue(resp.uploaded().isEmpty());
         assertEquals(1, resp.errors().size());
