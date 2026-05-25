@@ -129,7 +129,8 @@ public class InitData implements CommandLineRunner {
                 files,
                 "Sample caption",
                 "Sample photographer",
-                LocalDate.now());
+                LocalDate.now(),
+                null);
 
         // Link last 5 photos to the UHØRT show
         var show = showRepository.findByVenue("UHØRT").orElse(null);

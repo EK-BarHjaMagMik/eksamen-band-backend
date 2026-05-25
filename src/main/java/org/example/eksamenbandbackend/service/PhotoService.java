@@ -17,7 +17,9 @@ import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse.UploadError;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse.UploadedPhoto;
 import org.example.eksamenbandbackend.entity.Photo;
+import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
+import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -37,9 +39,11 @@ public class PhotoService {
     private String uploadDir;
 
     private final PhotoRepository photoRepository;
+    private final ShowRepository showRepository;
 
-    public PhotoService(PhotoRepository photoRepository) {
+    public PhotoService(PhotoRepository photoRepository, ShowRepository showRepository) {
         this.photoRepository = photoRepository;
+        this.showRepository = showRepository;
     }
 
     public List<PhotoResponse> getPhotos() {
@@ -66,10 +70,18 @@ public class PhotoService {
             List<MultipartFile> files,
             String caption,
             String photographer,
-            LocalDate dateTaken) {
+            LocalDate dateTaken,
+            Long showId) {
 
         List<UploadedPhoto> uploaded = new ArrayList<>();
         List<UploadError> errors = new ArrayList<>();
+
+        // Validate showId upfront if provided
+        Show show = null;
+        if (showId != null) {
+            show = showRepository.findById(showId).orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Show with ID " + showId + " not found"));
+        }
 
         for (MultipartFile file : files) {
             // Reject empty files
@@ -108,6 +120,7 @@ public class PhotoService {
                 photo.setCaption(caption);
                 photo.setPhotographer(photographer);
                 photo.setDateTaken(dateTaken != null ? dateTaken : LocalDate.now());
+                photo.setShow(show);
 
                 try {
                     photoRepository.save(photo);

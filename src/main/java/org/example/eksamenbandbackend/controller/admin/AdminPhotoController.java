@@ -31,9 +31,10 @@ public class AdminPhotoController {
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam(required = false) String caption,
             @RequestParam(required = false) String photographer,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTaken) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTaken,
+            @RequestParam(required = false) Long showId) {
         return new ResponseEntity<>(
-                photoService.uploadPhotos(files, caption, photographer, dateTaken),
+                photoService.uploadPhotos(files, caption, photographer, dateTaken, showId),
                 HttpStatus.OK);
     }
 
