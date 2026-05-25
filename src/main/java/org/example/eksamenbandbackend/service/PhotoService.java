@@ -128,7 +128,7 @@ public class PhotoService {
         return new UploadPhotosResponse(uploaded, errors);
     }
 
-    public Path saveFile(MultipartFile file) throws IOException {
+    private Path saveFile(MultipartFile file) throws IOException {
         Path dir = Paths.get(uploadDir.trim());
         Files.createDirectories(dir);
 
