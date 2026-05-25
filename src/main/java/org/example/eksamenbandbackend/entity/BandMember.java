@@ -30,6 +30,8 @@ public class BandMember {
 
     @Column(nullable = false)
     private int displayOrder;
+
+    private Long photoId;
 }
 
 
