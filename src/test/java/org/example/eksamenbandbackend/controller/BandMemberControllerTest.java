@@ -78,7 +78,7 @@ class BandMemberControllerTest {
     }
 
     @Test
-    void ShouldReturnBandMembersWithoutPhotoUrl() throws Exception {
+    void shouldReturnBandMembersWithoutPhotoUrl() throws Exception {
         // Photo URL is optional, so test that it can be null without causing issues.
         BandMember memberWithoutPhoto = new BandMember();
         memberWithoutPhoto.setName("Lars");
