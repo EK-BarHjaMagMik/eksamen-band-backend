@@ -18,9 +18,6 @@ public class ContactInfo {
     @Column(unique = true)
     private String bookingEmail;
 
-    @Column(unique = true)
-    private String phoneNumber;
-
     @Column
     private String emailNote;
 

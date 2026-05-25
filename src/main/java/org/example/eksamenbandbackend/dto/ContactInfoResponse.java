@@ -7,7 +7,6 @@ public record ContactInfoResponse(
         String email,
         String emailNote,
         String bookingEmail,
-        String phoneNumber,
         String bookingNote
 ) {
     public static ContactInfoResponse fromEntity(ContactInfo contactInfo) {
@@ -16,7 +15,6 @@ public record ContactInfoResponse(
                 contactInfo.getEmail(),
                 contactInfo.getEmailNote(),
                 contactInfo.getBookingEmail(),
-                contactInfo.getPhoneNumber(),
                 contactInfo.getBookingNote()
         );
     }
