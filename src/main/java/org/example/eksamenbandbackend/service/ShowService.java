@@ -23,6 +23,16 @@ public class ShowService {
         this.photoRepository = photoRepository;
     }
 
+    public List<ShowResponse> getShows() {
+        return showRepository.findAllByOrderByDateDesc()
+                .stream()
+                .map(show -> {
+                    boolean hasPhotos = photoRepository.existsByShowId(show.getId());
+                    return ShowResponse.fromEntity(show, hasPhotos);
+                })
+                .toList();
+    }
+
     public List<ShowResponse> getUpcomingShows() {
         return showRepository.findByDateAfterOrderByDateAsc(LocalDate.now())
                 .stream()

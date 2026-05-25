@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/shows")
@@ -20,6 +22,11 @@ public class ShowController {
     public ShowController(ShowService showService) {
         this.showService = showService;
     }
+
+    @GetMapping
+    public ResponseEntity<List<ShowResponse>> getShows() {
+        return new ResponseEntity<>(showService.getShows(), HttpStatus.OK);
+    }    
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<ShowResponse>> getUpcomingShows() {
