@@ -15,6 +15,8 @@ import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -44,7 +46,7 @@ class ShowControllerTest {
     }
 
     @Test
-    void shouldReturnUpcomingShowsWithStatus200() throws Exception {
+    void getUpcomingShows_returnsUpcomingShows_status200() throws Exception {
         mockMvc.perform(get("/api/shows/upcoming"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].city").value("Køge"))
@@ -53,7 +55,7 @@ class ShowControllerTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoUpcomingShows() throws Exception {
+    void getUpcomingShows_returnsEmptyList_whenNoUpcomingShows() throws Exception {
         showRepository.deleteAll();
 
         mockMvc.perform(get("/api/shows/upcoming"))
@@ -62,7 +64,7 @@ class ShowControllerTest {
     }
 
     @Test
-    void shouldReturnShowByIdWithStatus200() throws Exception {
+    void getShowById_returnsShow_status200() throws Exception {
         Show show = new Show();
         show.setDate(LocalDate.now().plusDays(5));
         show.setCity("Roskilde");
@@ -79,10 +81,35 @@ class ShowControllerTest {
     }
 
     @Test
-    void shouldReturn404WhenShowNotFound() throws Exception {
+    void getShowById_returns404_whenNotFound() throws Exception {
         showRepository.deleteAll();
 
         mockMvc.perform(get("/api/shows/{id}", 9999L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getShows_returnsAllShows_status200() throws Exception {
+        showRepository.deleteAll();
+
+        Show show1 = new Show();
+        show1.setDate(LocalDate.now().plusDays(5));
+        show1.setCity("Roskilde");
+        show1.setVenue("Pumpehuset");
+        show1.setTicketLink("https://example.com/tickets");
+
+        Show show2 = new Show();
+        show2.setDate(LocalDate.now().minusDays(10));
+        show2.setCity("Køge");
+        show2.setVenue("Tapperiet");
+        show2.setTicketLink("https://www.tapperiet.nu");
+
+        showRepository.save(show1);
+        showRepository.save(show2);
+
+        mockMvc.perform(get("/api/shows"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].city", containsInAnyOrder("Roskilde", "Køge")));
     }
 }
