@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.entity.Photo;
+import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
@@ -20,9 +21,12 @@ import java.nio.file.Path;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class PhotoServiceTest {
@@ -104,26 +108,68 @@ class PhotoServiceTest {
         when(file.getSize()).thenReturn(5L);
         when(file.getContentType()).thenReturn("image/jpeg");
         when(file.getOriginalFilename()).thenReturn("photo.jpg");
-        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1,2,3}));
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
 
         // act
-        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026,5,1), null);
+        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026, 5, 1), null);
 
         // assert
         assertEquals(1, resp.uploaded().size());
         assertTrue(resp.errors().isEmpty());
 
-        ArgumentCaptor<org.example.eksamenbandbackend.entity.Photo> captor = ArgumentCaptor.forClass(org.example.eksamenbandbackend.entity.Photo.class);
+        ArgumentCaptor<org.example.eksamenbandbackend.entity.Photo> captor = ArgumentCaptor
+                .forClass(org.example.eksamenbandbackend.entity.Photo.class);
         verify(photoRepository).save(captor.capture());
         var saved = captor.getValue();
         assertEquals("caption", saved.getCaption());
         assertEquals("photog", saved.getPhotographer());
-        assertEquals(LocalDate.of(2026,5,1), saved.getDateTaken());
+        assertEquals(LocalDate.of(2026, 5, 1), saved.getDateTaken());
 
         // file exists in upload dir
         var files = java.util.Arrays.stream(tempDir.toFile().listFiles()).map(java.io.File::getName).toList();
         assertFalse(files.isEmpty());
         assertTrue(files.get(0).endsWith(".jpg"));
+    }
+
+    @Test
+    void uploadPhotos_withUnknownShowIdThrowsBadRequest() {
+        when(showRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> photoService.uploadPhotos(List.of(), "caption", "photog", LocalDate.of(2026, 5, 1), 99L));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("Show with ID 99 not found"));
+        verify(showRepository).findById(99L);
+        verifyNoInteractions(photoRepository);
+    }
+
+    @Test
+    void uploadPhotos_associatesPersistedPhotoWithResolvedShow(@TempDir Path tempDir) throws Exception {
+        var f = PhotoService.class.getDeclaredField("uploadDir");
+        f.setAccessible(true);
+        f.set(photoService, tempDir.toString());
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(5L);
+        when(file.getContentType()).thenReturn("image/jpeg");
+        when(file.getOriginalFilename()).thenReturn("photo.jpg");
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
+
+        Show show = new Show();
+        show.setId(42L);
+        when(showRepository.findById(42L)).thenReturn(Optional.of(show));
+
+        var resp = photoService.uploadPhotos(List.of(file), "caption", "photog", LocalDate.of(2026, 5, 1), 42L);
+
+        assertEquals(1, resp.uploaded().size());
+        assertTrue(resp.errors().isEmpty());
+
+        ArgumentCaptor<Photo> captor = ArgumentCaptor.forClass(Photo.class);
+        verify(photoRepository).save(captor.capture());
+        assertSame(show, captor.getValue().getShow());
+        verify(showRepository).findById(42L);
     }
 
     @Test
@@ -165,7 +211,8 @@ class PhotoServiceTest {
 
         assertTrue(resp.uploaded().isEmpty());
         assertEquals(1, resp.errors().size());
-        assertTrue(resp.errors().get(0).reason().contains("too large") || resp.errors().get(0).reason().contains("too large") );
+        assertTrue(resp.errors().get(0).reason().contains("too large")
+                || resp.errors().get(0).reason().contains("too large"));
     }
 
     @Test
