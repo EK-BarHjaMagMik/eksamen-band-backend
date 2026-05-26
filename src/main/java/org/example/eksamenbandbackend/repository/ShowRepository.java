@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface ShowRepository extends JpaRepository<Show, Long> {
     List<Show> findAllByOrderByDateDesc();
-    
+
     List<Show> findByDateAfterOrderByDateAsc(LocalDate date);
 
     List<Show> findByDateLessThanEqualOrderByDateDesc(LocalDate date);
