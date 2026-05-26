@@ -76,4 +76,39 @@ class BandMemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void shouldReturnBandMembersWithoutPhotoUrl() throws Exception {
+        // Photo URL is optional, so test that it can be null without causing issues.
+        BandMember memberWithoutPhoto = new BandMember();
+        memberWithoutPhoto.setName("Lars");
+        memberWithoutPhoto.setRole("Bass");
+        memberWithoutPhoto.setBio("Bassist.");
+        memberWithoutPhoto.setDisplayOrder(3);
+        bandMemberRepository.save(memberWithoutPhoto);
+
+        mockMvc.perform(get("/api/band-members"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[2].name").value("Lars"))
+                .andExpect(jsonPath("$[2].photoUrl").isEmpty());
+    }
+
+    @Test
+    void shouldReturnBandMemberByIdWithStatus200() throws Exception {
+        BandMember saved = bandMemberRepository.findAll().stream()
+                .filter(m -> m.getName().equals("Kinnie"))
+                .findFirst().orElseThrow();
+
+        mockMvc.perform(get("/api/band-members/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Kinnie"))
+                .andExpect(jsonPath("$.role").value("Vocals"))
+                .andExpect(jsonPath("$.bio").value("Lead vocalist."));
+    }
+
+    @Test
+    void shouldReturn404WhenBandMemberNotFound() throws Exception {
+        mockMvc.perform(get("/api/band-members/99999"))
+                .andExpect(status().isNotFound());
+    }
 }
