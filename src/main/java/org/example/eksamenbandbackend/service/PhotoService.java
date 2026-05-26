@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class PhotoService {
 
@@ -208,6 +210,7 @@ public class PhotoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found with id: " + id));
     }
 
+    @Transactional
     public PhotoResponse updatePhoto(Long id, UpdatePhotoRequest request) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found with id: " + id));
