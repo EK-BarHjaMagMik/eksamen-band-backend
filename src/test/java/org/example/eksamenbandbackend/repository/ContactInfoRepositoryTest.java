@@ -24,7 +24,6 @@ class ContactInfoRepositoryTest {
 
         ContactInfo contact = new ContactInfo();
         contact.setEmail("test@example.com");
-        contact.setPhoneNumber("+45 12 34 56 78");
         contact.setBookingNote("For bookings, contact us.");
 
         contactInfoRepository.save(contact);

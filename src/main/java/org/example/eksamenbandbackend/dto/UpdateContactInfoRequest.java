@@ -4,6 +4,5 @@ public record UpdateContactInfoRequest(
         String email,
         String emailNote,
         String bookingEmail,
-        String phoneNumber,
         String bookingNote
 ) {}

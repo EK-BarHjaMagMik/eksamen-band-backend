@@ -28,7 +28,6 @@ public class ContactInfoService {
         existing.setEmail(request.email());
         existing.setEmailNote(request.emailNote());
         existing.setBookingEmail(request.bookingEmail());
-        existing.setPhoneNumber(request.phoneNumber());
         existing.setBookingNote(request.bookingNote());
 
         ContactInfo saved = contactInfoRepository.save(existing);
