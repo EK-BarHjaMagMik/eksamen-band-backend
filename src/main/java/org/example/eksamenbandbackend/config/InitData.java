@@ -266,8 +266,8 @@ public class InitData implements CommandLineRunner {
                     s.forEach(p -> {
                         try {
                             Files.deleteIfExists(p);
-                        } catch (IOException ignored) {
-
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to delete upload file: " + p, e);
                         }
                     });
                 }
