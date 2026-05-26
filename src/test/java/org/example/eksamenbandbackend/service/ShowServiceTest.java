@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.dto.ShowResponse;
@@ -140,6 +141,75 @@ class ShowServiceTest {
                 .thenReturn(List.of());
 
         List<ShowResponse> responses = showService.getPastShows();
+
+        assertTrue(responses.isEmpty());
+        verify(photoRepository, never()).existsByShowId(anyLong());
+    }
+
+    // -------------------------
+    // All shows (getShows)
+    // -------------------------
+    @Test
+    void getShows_returnsOrderedAndHasPhotosFlagSet() {
+        LocalDate today = LocalDate.now();
+
+        Show s1 = show(100L, today.plusDays(3), "City One", "Venue One");
+        Show s2 = show(101L, today.minusDays(2), "City Two", "Venue Two");
+
+        when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of(s1, s2));
+
+        Photo p = new Photo();
+        p.setShow(s1);
+        when(photoRepository.findAll()).thenReturn(List.of(p));
+
+        List<ShowResponse> responses = showService.getShows();
+
+        verify(photoRepository).findAll();
+
+        assertEquals(2, responses.size());
+
+        ShowResponse r1 = responses.get(0);
+        assertEquals(100L, r1.id());
+        assertEquals(s1.getDate(), r1.date());
+        assertEquals("City One", r1.city());
+        assertTrue(r1.hasPhotos());
+
+        ShowResponse r2 = responses.get(1);
+        assertEquals(101L, r2.id());
+        assertEquals(s2.getDate(), r2.date());
+        assertEquals("City Two", r2.city());
+        assertFalse(r2.hasPhotos());
+    }
+
+    @Test
+    void getShows_ignoresPhotosWithoutShow() {
+        LocalDate today = LocalDate.now();
+
+        Show s1 = show(100L, today.plusDays(3), "City One", "Venue One");
+        Show s2 = show(101L, today.minusDays(2), "City Two", "Venue Two");
+
+        when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of(s1, s2));
+
+        Photo orphanPhoto = new Photo();
+        orphanPhoto.setShow(null);
+
+        Photo linkedPhoto = new Photo();
+        linkedPhoto.setShow(s2);
+
+        when(photoRepository.findAll()).thenReturn(List.of(orphanPhoto, linkedPhoto));
+
+        List<ShowResponse> responses = showService.getShows();
+
+        assertEquals(2, responses.size());
+        assertFalse(responses.get(0).hasPhotos());
+        assertTrue(responses.get(1).hasPhotos());
+    }
+
+    @Test
+    void getShows_returnsEmptyListWhenNoShows() {
+        when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of());
+
+        List<ShowResponse> responses = showService.getShows();
 
         assertTrue(responses.isEmpty());
         verify(photoRepository, never()).existsByShowId(anyLong());

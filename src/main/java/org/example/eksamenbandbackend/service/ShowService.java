@@ -2,6 +2,7 @@ package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.dto.CreateShowRequest;
 import org.example.eksamenbandbackend.dto.ShowResponse;
+import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.entity.Show;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
@@ -11,6 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ShowService {
@@ -21,6 +25,23 @@ public class ShowService {
     public ShowService(ShowRepository showRepository, PhotoRepository photoRepository) {
         this.showRepository = showRepository;
         this.photoRepository = photoRepository;
+    }
+
+    public List<ShowResponse> getShows() {
+        List<Show> shows = showRepository.findAllByOrderByDateDesc();
+
+        // Fetch photo showIds in bulk to avoid N+1 queries
+        Set<Long> showIdsWithPhotos = photoRepository.findAll()
+            .stream()
+            .map(Photo::getShow)
+            .filter(Objects::nonNull)
+            .map(Show::getId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        return shows.stream()
+            .map(show -> ShowResponse.fromEntity(show, showIdsWithPhotos.contains(show.getId())))
+            .toList();
     }
 
     public List<ShowResponse> getUpcomingShows() {

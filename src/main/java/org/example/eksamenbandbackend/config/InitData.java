@@ -1,6 +1,9 @@
 package org.example.eksamenbandbackend.config;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.service.PhotoService;
 import org.example.eksamenbandbackend.service.UserService;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -35,10 +39,16 @@ public class InitData implements CommandLineRunner {
     private final BandBioRepository bandBioRepository;
     private final BandMemberRepository bandMemberRepository;
 
-    public InitData(UserService userService, PhotoService photoService, PhotoRepository photoRepository,
+    private final String uploadDir;
+
+    public InitData(UserService userService,
+            PhotoService photoService,
+            PhotoRepository photoRepository,
             ShowRepository showRepository,
-            ContactInfoRepository contactInfoRepository, BandBioRepository bandBioRepository,
-            BandMemberRepository bandMemberRepository) {
+            ContactInfoRepository contactInfoRepository,
+            BandBioRepository bandBioRepository,
+            BandMemberRepository bandMemberRepository,
+            @Value("${app.upload-dir}") String uploadDir) {
         this.userService = userService;
         this.photoService = photoService;
         this.photoRepository = photoRepository;
@@ -46,6 +56,7 @@ public class InitData implements CommandLineRunner {
         this.contactInfoRepository = contactInfoRepository;
         this.bandBioRepository = bandBioRepository;
         this.bandMemberRepository = bandMemberRepository;
+        this.uploadDir = uploadDir;
     }
 
     @Override
@@ -115,6 +126,8 @@ public class InitData implements CommandLineRunner {
             return;
         }
 
+        cleanUploadDir();
+
         List<MultipartFile> files = new ArrayList<>();
 
         try {
@@ -129,7 +142,8 @@ public class InitData implements CommandLineRunner {
                 files,
                 "Sample caption",
                 "Sample photographer",
-                LocalDate.now());
+                LocalDate.now(),
+                null);
 
         // Link last 5 photos to the UHØRT show
         var show = showRepository.findByVenue("UHØRT").orElse(null);
@@ -242,5 +256,26 @@ public class InitData implements CommandLineRunner {
                 filename,
                 contentType,
                 resource.getInputStream());
+    }
+
+    private void cleanUploadDir() {
+        try {
+            Path dir = Paths.get(System.getProperty("user.dir")).resolve(uploadDir);
+            if (Files.exists(dir)) {
+                try (var s = Files.list(dir)) {
+                    s.forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to delete upload file: " + p, e);
+                        }
+                    });
+                }
+            } else {
+                Files.createDirectories(dir);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to prepare upload dir", e);
+        }
     }
 }

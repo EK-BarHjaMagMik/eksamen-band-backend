@@ -21,6 +21,11 @@ public class ShowController {
         this.showService = showService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<ShowResponse>> getShows() {
+        return new ResponseEntity<>(showService.getShows(), HttpStatus.OK);
+    }    
+
     @GetMapping("/upcoming")
     public ResponseEntity<List<ShowResponse>> getUpcomingShows() {
         return new ResponseEntity<>(showService.getUpcomingShows(), HttpStatus.OK);
