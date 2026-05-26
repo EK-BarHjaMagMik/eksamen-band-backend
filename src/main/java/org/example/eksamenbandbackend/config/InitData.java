@@ -39,13 +39,16 @@ public class InitData implements CommandLineRunner {
     private final BandBioRepository bandBioRepository;
     private final BandMemberRepository bandMemberRepository;
 
-    @Value("${app.upload-dir}")
-    private String uploadDir;
+    private final String uploadDir;
 
-    public InitData(UserService userService, PhotoService photoService, PhotoRepository photoRepository,
+    public InitData(UserService userService,
+            PhotoService photoService,
+            PhotoRepository photoRepository,
             ShowRepository showRepository,
-            ContactInfoRepository contactInfoRepository, BandBioRepository bandBioRepository,
-            BandMemberRepository bandMemberRepository) {
+            ContactInfoRepository contactInfoRepository,
+            BandBioRepository bandBioRepository,
+            BandMemberRepository bandMemberRepository,
+            @Value("${app.upload-dir}") String uploadDir) {
         this.userService = userService;
         this.photoService = photoService;
         this.photoRepository = photoRepository;
@@ -53,6 +56,7 @@ public class InitData implements CommandLineRunner {
         this.contactInfoRepository = contactInfoRepository;
         this.bandBioRepository = bandBioRepository;
         this.bandMemberRepository = bandMemberRepository;
+        this.uploadDir = uploadDir;
     }
 
     @Override
@@ -263,7 +267,7 @@ public class InitData implements CommandLineRunner {
                         try {
                             Files.deleteIfExists(p);
                         } catch (IOException ignored) {
-                            
+
                         }
                     });
                 }

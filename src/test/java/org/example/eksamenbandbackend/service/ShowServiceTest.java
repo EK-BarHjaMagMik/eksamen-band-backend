@@ -182,6 +182,30 @@ class ShowServiceTest {
     }
 
     @Test
+    void getShows_ignoresPhotosWithoutShow() {
+        LocalDate today = LocalDate.now();
+
+        Show s1 = show(100L, today.plusDays(3), "City One", "Venue One");
+        Show s2 = show(101L, today.minusDays(2), "City Two", "Venue Two");
+
+        when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of(s1, s2));
+
+        Photo orphanPhoto = new Photo();
+        orphanPhoto.setShow(null);
+
+        Photo linkedPhoto = new Photo();
+        linkedPhoto.setShow(s2);
+
+        when(photoRepository.findAll()).thenReturn(List.of(orphanPhoto, linkedPhoto));
+
+        List<ShowResponse> responses = showService.getShows();
+
+        assertEquals(2, responses.size());
+        assertFalse(responses.get(0).hasPhotos());
+        assertTrue(responses.get(1).hasPhotos());
+    }
+
+    @Test
     void getShows_returnsEmptyListWhenNoShows() {
         when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of());
 
