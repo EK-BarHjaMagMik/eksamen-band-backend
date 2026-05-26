@@ -200,4 +200,10 @@ public class PhotoService {
                     e);
         }
     }
+
+    public PhotoResponse getPhoto(Long id) {
+        return photoRepository.findById(id)
+                .map(PhotoResponse::fromEntity)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found with id: " + id));
+    }
 }
