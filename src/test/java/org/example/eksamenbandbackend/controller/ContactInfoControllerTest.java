@@ -34,7 +34,6 @@ class ContactInfoControllerTest {
 
         ContactInfo contact = new ContactInfo();
         contact.setEmail("stuggofficial@gmail.com");
-        contact.setPhoneNumber("+45 12 34 56 78");
         contact.setBookingNote("For bookings, contact us.");
 
         contactInfoRepository.save(contact);
@@ -45,7 +44,6 @@ class ContactInfoControllerTest {
         mockMvc.perform(get("/api/contact"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("stuggofficial@gmail.com"))
-                .andExpect(jsonPath("$.phoneNumber").value("+45 12 34 56 78"))
                 .andExpect(jsonPath("$.bookingNote").value("For bookings, contact us."));
     }
 

@@ -222,27 +222,19 @@ public class InitData implements CommandLineRunner {
     }
 
     private void initContactInfo() {
-        ContactInfo contact = contactInfoRepository.findTopByOrderByIdAsc().orElse(new ContactInfo());
-
-        boolean isNew = contact.getId() == null;
-        boolean missingBookingEmail = contact.getBookingEmail() == null;
-        boolean missingEmailNote = contact.getEmailNote() == null;
-        boolean outdatedBookingNote = !"Management, bookings, media".equals(contact.getBookingNote());
-
-        if (!isNew && !missingBookingEmail && !missingEmailNote && !outdatedBookingNote) {
-            System.out.println("Contact info already up to date — skipping init.");
+        if (contactInfoRepository.findTopByOrderByIdAsc().isPresent()) {
+            System.out.println("Contact info already present — skipping init.");
             return;
         }
 
-        if (isNew) {
-            contact.setEmail("stuggofficial@gmail.com");
-        }
+        ContactInfo contact = new ContactInfo();
+        contact.setEmail("stuggofficial@gmail.com");
         contact.setBookingEmail("kinnie@beatbreaker.dk");
         contact.setEmailNote("Fan mail, questions, feedback");
         contact.setBookingNote("Management, bookings, media");
 
         contactInfoRepository.save(contact);
-        System.out.println(isNew ? "Contact info initialized" : "Contact info updated with bookingEmail");
+        System.out.println("Contact info initialized");
     }
 
     private MultipartFile loadSampleFile(String filename) throws IOException {
