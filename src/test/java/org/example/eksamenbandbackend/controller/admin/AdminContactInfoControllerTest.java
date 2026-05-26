@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminContactInfoController.class)
-public class AdminContactInfoControllerTest {
+class AdminContactInfoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,20 +45,19 @@ public class AdminContactInfoControllerTest {
                 "stuggofficial@gmail.com",
                 "General inquiries",
                 "booking@stugg.dk",
-                "For bookings, contact us."
-        );
+                "For bookings, contact us.");
         when(contactInfoService.update(any(UpdateContactInfoRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/admin/contact-info")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "stuggofficial@gmail.com",
-                                  "emailNote": "General inquiries",
-                                  "bookingEmail": "booking@stugg.dk",
-                                  "bookingNote": "For bookings, contact us."
-                                }
-                                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "email": "stuggofficial@gmail.com",
+                            "emailNote": "General inquiries",
+                            "bookingEmail": "booking@stugg.dk",
+                            "bookingNote": "For bookings, contact us."
+                        }
+                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("stuggofficial@gmail.com"))
                 .andExpect(jsonPath("$.bookingEmail").value("booking@stugg.dk"))
