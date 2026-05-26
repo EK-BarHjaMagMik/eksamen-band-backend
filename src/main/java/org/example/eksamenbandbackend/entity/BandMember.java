@@ -31,6 +31,7 @@ public class BandMember {
     @Column(nullable = false)
     private int displayOrder;
 
+    @Column(length = 2048)
     private String photoUrl;
 }
 
