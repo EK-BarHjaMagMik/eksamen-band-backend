@@ -1,6 +1,9 @@
 package org.example.eksamenbandbackend.config;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.service.PhotoService;
 import org.example.eksamenbandbackend.service.UserService;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -34,6 +38,9 @@ public class InitData implements CommandLineRunner {
     private final ContactInfoRepository contactInfoRepository;
     private final BandBioRepository bandBioRepository;
     private final BandMemberRepository bandMemberRepository;
+
+    @Value("${app.upload-dir}")
+    private String uploadDir;
 
     public InitData(UserService userService, PhotoService photoService, PhotoRepository photoRepository,
             ShowRepository showRepository,
@@ -114,6 +121,8 @@ public class InitData implements CommandLineRunner {
             System.out.println("Photos already exist — skipping sample photo init.");
             return;
         }
+
+        cleanUploadDir();
 
         List<MultipartFile> files = new ArrayList<>();
 
@@ -251,5 +260,26 @@ public class InitData implements CommandLineRunner {
                 filename,
                 contentType,
                 resource.getInputStream());
+    }
+
+    private void cleanUploadDir() {
+        try {
+            Path dir = Paths.get(System.getProperty("user.dir")).resolve(uploadDir);
+            if (Files.exists(dir)) {
+                try (var s = Files.list(dir)) {
+                    s.forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException ignored) {
+                            
+                        }
+                    });
+                }
+            } else {
+                Files.createDirectories(dir);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to prepare upload dir", e);
+        }
     }
 }

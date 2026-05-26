@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.controller;
 
 import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
 @SpringBootTest
@@ -30,12 +30,15 @@ class ShowControllerTest {
     @Autowired
     private ShowRepository showRepository;
 
+    @Autowired
+    private PhotoRepository photoRepository;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
+        photoRepository.deleteAll();
         showRepository.deleteAll();
-
         Show upcoming = new Show();
         upcoming.setDate(LocalDate.now().plusDays(10));
         upcoming.setCity("Køge");
@@ -90,6 +93,7 @@ class ShowControllerTest {
 
     @Test
     void getShows_returnsAllShows_status200() throws Exception {
+        photoRepository.deleteAll();
         showRepository.deleteAll();
 
         Show show1 = new Show();
@@ -110,6 +114,7 @@ class ShowControllerTest {
         mockMvc.perform(get("/api/shows"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[*].city", containsInAnyOrder("Roskilde", "Køge")));
+                .andExpect(jsonPath("$[0].city").value("Roskilde"))
+                .andExpect(jsonPath("$[1].city").value("Køge"));
     }
 }

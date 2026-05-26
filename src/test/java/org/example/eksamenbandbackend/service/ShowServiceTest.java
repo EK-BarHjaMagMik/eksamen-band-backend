@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.entity.Show;
+import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.repository.PhotoRepository;
 import org.example.eksamenbandbackend.repository.ShowRepository;
 import org.example.eksamenbandbackend.dto.ShowResponse;
@@ -156,13 +157,14 @@ class ShowServiceTest {
         Show s2 = show(101L, today.minusDays(2), "City Two", "Venue Two");
 
         when(showRepository.findAllByOrderByDateDesc()).thenReturn(List.of(s1, s2));
-        when(photoRepository.existsByShowId(100L)).thenReturn(true);
-        when(photoRepository.existsByShowId(101L)).thenReturn(false);
+
+        Photo p = new Photo();
+        p.setShow(s1);
+        when(photoRepository.findAll()).thenReturn(List.of(p));
 
         List<ShowResponse> responses = showService.getShows();
 
-        verify(photoRepository).existsByShowId(100L);
-        verify(photoRepository).existsByShowId(101L);
+        verify(photoRepository).findAll();
 
         assertEquals(2, responses.size());
 
