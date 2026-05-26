@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.example.eksamenbandbackend.dto.PhotoResponse;
+import org.example.eksamenbandbackend.dto.UpdatePhotoRequest;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse.UploadError;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse.UploadedPhoto;
@@ -205,5 +206,28 @@ public class PhotoService {
         return photoRepository.findById(id)
                 .map(PhotoResponse::fromEntity)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found with id: " + id));
+    }
+
+    public PhotoResponse updatePhoto(Long id, UpdatePhotoRequest request) {
+        Photo photo = photoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found with id: " + id));
+
+        // Validate showId if provided
+        Show show = null;
+        if (request.showId() != null) {
+            show = showRepository.findById(request.showId()).orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Show with ID " + request.showId() + " not found"));
+        }
+
+        // Update photo fields
+        photo.setCaption(request.caption());
+        photo.setDateTaken(request.dateTaken());
+        photo.setPhotographer(request.photographer());
+        photo.setShow(show);
+
+        // Save updated photo
+        photoRepository.save(photo);
+
+        return PhotoResponse.fromEntity(photo);
     }
 }
