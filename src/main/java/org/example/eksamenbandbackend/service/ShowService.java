@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ShowService {
@@ -24,13 +26,17 @@ public class ShowService {
     }
 
     public List<ShowResponse> getShows() {
-        return showRepository.findAllByOrderByDateDesc()
-                .stream()
-                .map(show -> {
-                    boolean hasPhotos = photoRepository.existsByShowId(show.getId());
-                    return ShowResponse.fromEntity(show, hasPhotos);
-                })
-                .toList();
+        List<Show> shows = showRepository.findAllByOrderByDateDesc();
+
+        // Fetch photo showIds in bulk to avoid N+1 queries
+        Set<Long> showIdsWithPhotos = photoRepository.findAll()
+            .stream()
+            .map(photo -> photo.getShow().getId())
+            .collect(Collectors.toSet());
+
+        return shows.stream()
+            .map(show -> ShowResponse.fromEntity(show, showIdsWithPhotos.contains(show.getId())))
+            .toList();
     }
 
     public List<ShowResponse> getUpcomingShows() {
