@@ -7,9 +7,11 @@ import org.example.eksamenbandbackend.service.PhotoService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/photos")
@@ -32,6 +34,11 @@ public class PhotoController {
     @GetMapping("/recent")
     public ResponseEntity<List<PhotoResponse>> getRecentPhotos(@RequestParam(defaultValue = "6") int limit) {
         return new ResponseEntity<>(photoService.getRecentPhotos(limit), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PhotoResponse> getPhoto(@PathVariable Long id) {
+        return new ResponseEntity<>(photoService.getPhoto(id), HttpStatus.OK);
     }
 
 }

@@ -37,20 +37,17 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.12.6</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.12.6</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -118,7 +115,7 @@
 
 	<build>
 		<!-- Fixed artifact name so the Dockerfile can copy target/app.jar
-		     deterministically instead of globbing target/*.jar. -->
+			deterministically instead of globbing target/*.jar. -->
 		<finalName>app</finalName>
 		<plugins>
 			<plugin>
