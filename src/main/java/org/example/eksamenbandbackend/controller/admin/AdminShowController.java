@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller.admin;
 
+import jakarta.validation.Valid;
 import org.example.eksamenbandbackend.dto.CreateShowRequest;
 import org.example.eksamenbandbackend.dto.ShowResponse;
 import org.example.eksamenbandbackend.entity.Show;
@@ -18,13 +19,13 @@ public class AdminShowController {
     }
 
     @PostMapping
-    public ResponseEntity<ShowResponse> createShow(@RequestBody CreateShowRequest request) {
+    public ResponseEntity<ShowResponse> createShow(@Valid @RequestBody CreateShowRequest request) {
         Show show = showService.createShow(request);
         return ResponseEntity.ok(ShowResponse.fromEntity(show, false));
     }
 
     @PutMapping("/{showId}")
-    public ResponseEntity<ShowResponse> updateShow(@PathVariable Long showId, @RequestBody CreateShowRequest request) {
+    public ResponseEntity<ShowResponse> updateShow(@PathVariable Long showId, @Valid @RequestBody CreateShowRequest request) {
         ShowResponse showResponse = showService.editShowById(showId, request);
         return ResponseEntity.ok(showResponse);
     }
