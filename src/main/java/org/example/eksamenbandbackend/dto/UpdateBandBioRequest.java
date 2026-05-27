@@ -1,3 +1,5 @@
 package org.example.eksamenbandbackend.dto;
 
-public record UpdateBandBioRequest(String content) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record UpdateBandBioRequest(@NotBlank String content) {}

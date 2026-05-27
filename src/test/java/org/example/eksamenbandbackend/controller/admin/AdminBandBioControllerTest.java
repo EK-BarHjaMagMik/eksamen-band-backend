@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -57,5 +58,18 @@ class AdminBandBioControllerTest {
         ArgumentCaptor<UpdateBandBioRequest> captor = ArgumentCaptor.forClass(UpdateBandBioRequest.class);
         verify(bandBioService).update(captor.capture());
         assertThat(captor.getValue().content()).isEqualTo("Updated bio text.\n\nSecond paragraph.");
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void shouldRejectBlankContentWith400() throws Exception {
+        mockMvc.perform(put("/api/admin/band-bio")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        { "content": "   " }
+                        """))
+                .andExpect(status().isBadRequest());
+
+        verify(bandBioService, never()).update(any(UpdateBandBioRequest.class));
     }
 }

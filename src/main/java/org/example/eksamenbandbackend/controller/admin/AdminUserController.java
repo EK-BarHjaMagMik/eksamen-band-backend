@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller.admin;
 
+import jakarta.validation.Valid;
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
 import org.example.eksamenbandbackend.dto.UserResponse;
 import org.example.eksamenbandbackend.entity.User;
@@ -21,7 +22,7 @@ public class AdminUserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         User user = userService.createUser(request);
         return ResponseEntity.ok(UserResponse.fromEntity(user));
     }

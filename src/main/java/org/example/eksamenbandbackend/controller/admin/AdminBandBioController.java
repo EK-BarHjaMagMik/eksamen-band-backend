@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller.admin;
 
+import jakarta.validation.Valid;
 import org.example.eksamenbandbackend.dto.BandBioResponse;
 import org.example.eksamenbandbackend.dto.UpdateBandBioRequest;
 import org.example.eksamenbandbackend.service.BandBioService;
@@ -20,7 +21,7 @@ public class AdminBandBioController {
     }
 
     @PutMapping
-    public ResponseEntity<BandBioResponse> updateBandBio(@RequestBody UpdateBandBioRequest request) {
+    public ResponseEntity<BandBioResponse> updateBandBio(@Valid @RequestBody UpdateBandBioRequest request) {
         return ResponseEntity.ok(bandBioService.update(request));
     }
 }
