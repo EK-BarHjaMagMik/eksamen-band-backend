@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller.admin;
 
+import jakarta.validation.Valid;
 import org.example.eksamenbandbackend.dto.ContactInfoResponse;
 import org.example.eksamenbandbackend.dto.UpdateContactInfoRequest;
 import org.example.eksamenbandbackend.service.ContactInfoService;
@@ -20,7 +21,7 @@ public class AdminContactInfoController {
     }
 
     @PutMapping
-    public ResponseEntity<ContactInfoResponse> updateContactInfo(@RequestBody UpdateContactInfoRequest request) {
+    public ResponseEntity<ContactInfoResponse> updateContactInfo(@Valid @RequestBody UpdateContactInfoRequest request) {
         return ResponseEntity.ok(contactInfoService.update(request));
     }
 }

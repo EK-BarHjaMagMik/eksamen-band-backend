@@ -4,7 +4,9 @@ import org.example.eksamenbandbackend.dto.ContactInfoResponse;
 import org.example.eksamenbandbackend.dto.UpdateContactInfoRequest;
 import org.example.eksamenbandbackend.entity.ContactInfo;
 import org.example.eksamenbandbackend.repository.ContactInfoRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -17,7 +19,7 @@ public class ContactInfoService {
 
     public ContactInfoResponse get(){
         ContactInfo contactInfo = contactInfoRepository.findTopByOrderByIdAsc().orElseThrow(() ->
-                new RuntimeException("Contact info not initialized"));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact info not initialized"));
 
         return ContactInfoResponse.fromEntity(contactInfo);
     }

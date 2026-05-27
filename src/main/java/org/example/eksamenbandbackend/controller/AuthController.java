@@ -1,5 +1,6 @@
 package org.example.eksamenbandbackend.controller;
 
+import jakarta.validation.Valid;
 import org.example.eksamenbandbackend.dto.LoginRequest;
 import org.example.eksamenbandbackend.dto.AuthResponse;
 import org.example.eksamenbandbackend.entity.User;
@@ -29,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 
         try {
             // Let Spring Security verify the supplied credentials before issuing a token.
