@@ -1,9 +1,11 @@
 package org.example.eksamenbandbackend.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +194,7 @@ public class InitData implements CommandLineRunner {
         m1.setBio(
                 "Kasper is the lead vocalist of STÜGG, known for his powerful and versatile voice that can switch between clean singing, screaming, and growling with ease.");
         m1.setDisplayOrder(1);
+        applyMemberPhoto(m1, "kasper.png");
 
         BandMember m2 = new BandMember();
         m2.setName("Morten");
@@ -199,6 +202,7 @@ public class InitData implements CommandLineRunner {
         m2.setBio(
                 "Morten is the guitarist of STÜGG, responsible for crafting the band's heavy riffs and melodic solos that define their sound.");
         m2.setDisplayOrder(2);
+        applyMemberPhoto(m2, "morten.png");
 
         BandMember m3 = new BandMember();
         m3.setName("Andreas");
@@ -206,6 +210,7 @@ public class InitData implements CommandLineRunner {
         m3.setBio(
                 "Andreas is the second guitarist of STÜGG, complementing Morten with his own unique style and contributing to the band's dynamic guitar work.");
         m3.setDisplayOrder(3);
+        applyMemberPhoto(m3, "andreas.png");
 
         BandMember m4 = new BandMember();
         m4.setName("Mikkel");
@@ -213,6 +218,7 @@ public class InitData implements CommandLineRunner {
         m4.setBio(
                 "Mikkel is the bassist of STÜGG, providing the low-end foundation and groove that drives the band's heavy sound.");
         m4.setDisplayOrder(4);
+        applyMemberPhoto(m4, "mikkel.png");
 
         BandMember m5 = new BandMember();
         m5.setName("Gustav");
@@ -220,9 +226,30 @@ public class InitData implements CommandLineRunner {
         m5.setBio(
                 "Gustav is the drummer of STÜGG, known for his powerful and precise drumming style that adds intensity and energy to the band's music.");
         m5.setDisplayOrder(5);
+        applyMemberPhoto(m5, "gustav.png");
+
         bandMemberRepository.saveAll(List.of(m1, m2, m3, m4, m5));
         System.out.println("BandMembers initialized");
 
+    }
+
+    private void applyMemberPhoto(BandMember member, String filename) {
+        ClassPathResource resource = new ClassPathResource("sample-members/" + filename);
+        if (!resource.exists()) {
+            System.out.println("Member photo not found, skipping: " + filename);
+            return;
+        }
+        try {
+            Path dir = Paths.get(uploadDir.trim());
+            Files.createDirectories(dir);
+            Path target = dir.resolve(filename);
+            try (InputStream in = resource.getInputStream()) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+            member.setPhotoUrl("/uploads/" + filename);
+        } catch (IOException e) {
+            System.err.println("Failed to copy member photo " + filename + ": " + e.getMessage());
+        }
     }
 
     private void initContactInfo() {
