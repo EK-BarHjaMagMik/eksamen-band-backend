@@ -24,7 +24,7 @@ class ImageProcessingServiceTest {
 
     @Test
     void shouldGenerateOptimizedWebpBoundedTo1600(@TempDir Path tempDir) throws IOException {
-        Path source = createTestImage(tempDir, "abc123.jpg", 3000, 2000);
+        Path source = createTestImage(tempDir);
 
         Path optimized = service.generateOptimized(source);
 
@@ -40,7 +40,7 @@ class ImageProcessingServiceTest {
 
     @Test
     void shouldGenerateThumbnailWebp300pxWide(@TempDir Path tempDir) throws IOException {
-        Path source = createTestImage(tempDir, "abc123.jpg", 3000, 2000);
+        Path source = createTestImage(tempDir);
 
         Path thumbnail = service.generateThumbnail(source);
 
@@ -55,7 +55,7 @@ class ImageProcessingServiceTest {
 
     @Test
     void thumbnailShouldBeSmallerBytesThanOriginal(@TempDir Path tempDir) throws IOException {
-        Path source = createTestImage(tempDir, "abc123.jpg", 3000, 2000);
+        Path source = createTestImage(tempDir);
         long originalSize = source.toFile().length();
 
         Path thumbnail = service.generateThumbnail(source);
@@ -63,17 +63,23 @@ class ImageProcessingServiceTest {
         assertThat(thumbnail.toFile().length()).isLessThan(originalSize);
     }
 
-    private static Path createTestImage(Path dir, String name, int width, int height) throws IOException {
+    /**
+     * Writes a 3000×2000 JPEG named "abc123.jpg" into the given directory.
+     * Uses a gradient (not a solid color) so WebP compression has something
+     * realistic to chew on. Returns the path so tests can pass it to the
+     * service under test.
+     */
+    private static Path createTestImage(Path dir) throws IOException {
+        int width = 3000;
+        int height = 2000;
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = img.createGraphics();
-        // Gradient so WebP compression has something realistic to chew on,
-        // not just a solid color (which compresses to almost nothing).
         for (int y = 0; y < height; y++) {
             g.setColor(new Color(y % 256, (y * 2) % 256, (y * 3) % 256));
             g.fillRect(0, y, width, 1);
         }
         g.dispose();
-        Path path = dir.resolve(name);
+        Path path = dir.resolve("abc123.jpg");
         ImageIO.write(img, "jpg", path.toFile());
         return path;
     }
