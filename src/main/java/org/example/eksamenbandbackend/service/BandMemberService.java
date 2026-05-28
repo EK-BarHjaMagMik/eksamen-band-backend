@@ -2,15 +2,32 @@ package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.dto.BandMemberResponse;
 import org.example.eksamenbandbackend.dto.UpdateBandMemberRequest;
+import org.example.eksamenbandbackend.entity.BandMember;
 import org.example.eksamenbandbackend.repository.BandMemberRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class BandMemberService {
+
+    private static final Set<String> ALLOWED_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/webp");
+    private static final long MAX_UPLOAD_SIZE_BYTES = 30L * 1024 * 1024;
+
+    @Value("${app.upload-dir}")
+    private String uploadDir;
 
     private final BandMemberRepository bandMemberRepository;
 
@@ -49,5 +66,82 @@ public class BandMemberService {
                                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                                         "Band member not found with id: " + id)
                 );
+    }
+
+    public BandMemberResponse uploadBandMemberPhoto(Long id, MultipartFile file) {
+        BandMember bandMember = bandMemberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Band member not found with id: " + id));
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
+        }
+        if (file.getSize() > MAX_UPLOAD_SIZE_BYTES) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "File is too large: " + file.getSize() + " bytes");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Unsupported file type: " + contentType);
+        }
+
+        Path savedPath;
+        try {
+            savedPath = saveFile(file);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to save file", e);
+        }
+
+        String oldUrl = bandMember.getPhotoUrl();
+        String newUrl = "/uploads/" + savedPath.getFileName();
+
+        bandMember.setPhotoUrl(newUrl);
+        BandMember saved;
+        try {
+            saved = bandMemberRepository.save(bandMember);
+        } catch (RuntimeException e) {
+            deleteFileFromDisk(newUrl);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to update band member", e);
+        }
+
+        deleteFileFromDisk(oldUrl);
+
+        return BandMemberResponse.fromEntity(saved);
+    }
+
+    private Path saveFile(MultipartFile file) throws IOException {
+        Path dir = Paths.get(uploadDir.trim());
+        Files.createDirectories(dir);
+
+        String originalFilename = file.getOriginalFilename();
+        String fileExt = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExt = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String filename = UUID.randomUUID() + fileExt;
+        Path targetPath = dir.resolve(filename);
+
+        try (InputStream in = file.getInputStream()) {
+            Files.copy(in, targetPath);
+        }
+
+        return targetPath;
+    }
+
+    private void deleteFileFromDisk(String url) {
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        String filename = Paths.get(url).getFileName().toString();
+        Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            System.err.println("Failed to delete file: " + filePath + " - " + e.getMessage());
+        }
     }
 }
