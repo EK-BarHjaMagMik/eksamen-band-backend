@@ -37,11 +37,14 @@ class PhotoServiceTest {
     @Mock
     private ShowRepository showRepository;
 
+    @Mock
+    private ImageProcessingService imageProcessingService;
+
     private PhotoService photoService;
 
     @BeforeEach
     void setUp() {
-        photoService = new PhotoService(photoRepository, showRepository);
+        photoService = new PhotoService(photoRepository, showRepository, imageProcessingService);
     }
 
     @Test

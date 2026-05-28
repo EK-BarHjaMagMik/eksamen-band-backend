@@ -90,6 +90,8 @@ class AdminPhotoControllerTest {
         PhotoResponse response = new PhotoResponse(
                 7L,
                 "/uploads/updated.jpg",
+                null,
+                null,
                 "Updated caption",
                 LocalDate.of(2026, 5, 2),
                 "Updated photographer",
