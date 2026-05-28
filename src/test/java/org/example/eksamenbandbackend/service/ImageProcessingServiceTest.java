@@ -48,9 +48,9 @@ class ImageProcessingServiceTest {
         assertThat(thumbnail.getFileName().toString()).isEqualTo("abc123-thumb.webp");
         BufferedImage img = ImageIO.read(thumbnail.toFile());
         assertThat(img).isNotNull();
-        assertThat(img.getWidth()).isEqualTo(300);
-        // 3000x2000 → thumb 300x200, aspect preserved
-        assertThat(img.getHeight()).isEqualTo(200);
+        assertThat(img.getWidth()).isEqualTo(600);
+        // 3000x2000 → thumb 600x400, aspect preserved
+        assertThat(img.getHeight()).isEqualTo(400);
     }
 
     @Test

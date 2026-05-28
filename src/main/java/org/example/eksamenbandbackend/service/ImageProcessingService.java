@@ -11,7 +11,10 @@ public class ImageProcessingService {
 
     private static final int OPTIMIZED_MAX_DIMENSION = 1600;
     private static final float OPTIMIZED_QUALITY = 0.82f;
-    private static final int THUMBNAIL_WIDTH = 300;
+    // Sized to display crisply at the largest grid-column width (~400 CSS px)
+    // on a 2x-DPR retina screen. 300px was visibly upscaled (~2.6x); 600px
+    // keeps the bytes manageable (~50-70 KB) while looking sharp.
+    private static final int THUMBNAIL_WIDTH = 600;
     private static final float THUMBNAIL_QUALITY = 0.75f;
     private static final String WEBP_EXT = ".webp";
 
