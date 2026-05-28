@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
 import org.example.eksamenbandbackend.dto.BandMemberResponse;
+import org.example.eksamenbandbackend.dto.UpdateBandMemberRequest;
 import org.example.eksamenbandbackend.repository.BandMemberRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,5 +36,18 @@ public class BandMemberService {
     }
 
     public BandMemberResponse editBandMemberById(Long id, UpdateBandMemberRequest request) {
+        return bandMemberRepository.findById( id)
+                .map(bandMember -> {
+                    bandMember.setName(request.name());
+                    bandMember.setRole(request.role());
+                    bandMember.setBio(request.bio());
+                    bandMember.setPhotoUrl(request.photoUrl());
+                    return BandMemberResponse.fromEntity(bandMemberRepository.save(bandMember));
+                })
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "Band member not found with id: " + id)
+                );
     }
 }
