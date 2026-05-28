@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.example.eksamenbandbackend.dto.UpdatePhotoRequest;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
@@ -232,5 +234,44 @@ public class PhotoService {
         photoRepository.save(photo);
 
         return PhotoResponse.fromEntity(photo);
+    }
+
+    public List<PhotoResponse> batchUpdatePhotos(BatchPhotoUpdateRequest req) {
+
+        List<Photo> photos = photoRepository.findAllById(req.photoIds());
+
+        for (Photo p : photos) {
+
+            // caption
+            if (req.caption().isPresent()) {
+                p.setCaption(req.caption().orElse(null)); // null clears
+            }
+
+            // dateTaken
+            if (req.dateTaken().isPresent()) {
+                p.setDateTaken(req.dateTaken().orElse(null));
+            }
+
+            // photographer
+            if (req.photographer().isPresent()) {
+                p.setPhotographer(req.photographer().orElse(null));
+            }
+
+            // showId
+            if (req.showId().isPresent()) {
+                Long id = req.showId().orElse(null);
+                if (id == null) {
+                    p.setShow(null);
+                } else {
+                    Show s = showRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("Show not found: " + id));
+                    p.setShow(s);
+                }
+            }
+        }
+
+        photoRepository.saveAll(photos);
+        
+        return photos.stream().map(PhotoResponse::fromEntity).collect(Collectors.toList());
     }
 }

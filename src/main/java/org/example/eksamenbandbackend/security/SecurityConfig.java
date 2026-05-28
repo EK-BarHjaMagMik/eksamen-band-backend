@@ -69,7 +69,7 @@ public class SecurityConfig {
                 "https://stugg.dk",
                 "https://www.stugg.dk"));
         // Permit the HTTP methods used by the API.
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         // Expose the Authorization header so clients can read tokens from responses.

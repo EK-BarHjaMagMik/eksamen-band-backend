@@ -3,6 +3,7 @@ package org.example.eksamenbandbackend.controller.admin;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.example.eksamenbandbackend.dto.UpdatePhotoRequest;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
@@ -11,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -48,6 +50,11 @@ public class AdminPhotoController {
     public ResponseEntity<PhotoResponse> updatePhoto(@PathVariable Long id,
             @Valid @RequestBody UpdatePhotoRequest request) {
         return new ResponseEntity<>(photoService.updatePhoto(id, request), HttpStatus.OK);
+    }
+    
+    @PatchMapping
+    public ResponseEntity<List<PhotoResponse>> batchUpdatePhotos(@Valid @RequestBody BatchPhotoUpdateRequest req) {
+        return new ResponseEntity<>(photoService.batchUpdatePhotos(req), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
