@@ -33,4 +33,7 @@ public class BandMemberService {
                                         "Band member not found with id: " + bandMemberId)
                 );
     }
+
+    public BandMemberResponse editBandMemberById(Long id, UpdateBandMemberRequest request) {
+    }
 }
