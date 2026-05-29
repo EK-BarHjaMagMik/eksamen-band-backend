@@ -25,6 +25,9 @@ public class BandMemberService {
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp");
     private static final long MAX_UPLOAD_SIZE_BYTES = 30L * 1024 * 1024;
+    // Photos for band-member profiles live under their own subdirectory so
+    // they're clearly separate from the general photos library on disk.
+    private static final String MEMBER_PHOTO_SUBDIR = "members";
 
     @Value("${app.upload-dir}")
     private String uploadDir;
@@ -95,7 +98,7 @@ public class BandMemberService {
         }
 
         String oldUrl = bandMember.getPhotoUrl();
-        String newUrl = "/uploads/" + savedPath.getFileName();
+        String newUrl = "/uploads/" + MEMBER_PHOTO_SUBDIR + "/" + savedPath.getFileName();
 
         bandMember.setPhotoUrl(newUrl);
         BandMember saved;
@@ -113,7 +116,7 @@ public class BandMemberService {
     }
 
     private Path saveFile(MultipartFile file) throws IOException {
-        Path dir = Paths.get(uploadDir.trim());
+        Path dir = Paths.get(uploadDir.trim()).resolve(MEMBER_PHOTO_SUBDIR);
         Files.createDirectories(dir);
 
         String originalFilename = file.getOriginalFilename();
@@ -136,8 +139,12 @@ public class BandMemberService {
         if (url == null || url.isEmpty()) {
             return;
         }
+        // url is /uploads/members/<filename>. Resolve under the configured
+        // upload dir + members subdir so old (pre-subdir) URLs at the root
+        // of /uploads/ would NOT be touched here — those belong to the
+        // sample-member seed init and shouldn't be deleted on a new upload.
         String filename = Paths.get(url).getFileName().toString();
-        Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
+        Path filePath = Paths.get(uploadDir.trim()).resolve(MEMBER_PHOTO_SUBDIR).resolve(filename);
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {

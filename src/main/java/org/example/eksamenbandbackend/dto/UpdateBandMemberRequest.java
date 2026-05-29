@@ -7,6 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 public record UpdateBandMemberRequest(
         @NotBlank String name,
         @NotBlank String role,
-        String bio,
+        @NotBlank String bio,
         String photoUrl
 ) {}
