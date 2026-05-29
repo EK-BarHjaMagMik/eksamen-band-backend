@@ -143,6 +143,17 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<!-- webp-imageio uses JNI to load native libwebp; Java 24+
+						 warns (and will eventually block) the System.load call
+						 unless native access is enabled for the classpath. -->
+					<jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>--enable-native-access=ALL-UNNAMED</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
