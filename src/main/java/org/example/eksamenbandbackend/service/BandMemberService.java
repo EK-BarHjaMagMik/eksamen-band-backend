@@ -116,17 +116,25 @@ public class BandMemberService {
     }
 
     private Path saveFile(MultipartFile file) throws IOException {
+        // Defense in depth: uploadBandMemberPhoto already rejects anything
+        // outside ALLOWED_TYPES, but re-check here so this method is safe
+        // to call from any future entry point.
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new IOException("Unsupported content type: " + contentType);
+        }
+
         Path dir = Paths.get(uploadDir.trim()).resolve(MEMBER_PHOTO_SUBDIR);
         Files.createDirectories(dir);
 
-        // Derive the extension from the already-validated content type
-        // (uploadBandMemberPhoto rejects anything outside ALLOWED_TYPES).
-        // Avoids user-controlled originalFilename flowing into the path.
-        String fileExt = switch (file.getContentType()) {
+        // Derive the extension from the validated content type — never from
+        // the user's originalFilename. The default branch is unreachable
+        // given the check above; it's only here to satisfy the compiler.
+        String fileExt = switch (contentType) {
             case "image/jpeg" -> ".jpg";
             case "image/png" -> ".png";
             case "image/webp" -> ".webp";
-            default -> "";
+            default -> ".bin";
         };
 
         String filename = UUID.randomUUID() + fileExt;
