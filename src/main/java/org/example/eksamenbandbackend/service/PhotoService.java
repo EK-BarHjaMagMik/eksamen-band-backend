@@ -236,9 +236,25 @@ public class PhotoService {
         return PhotoResponse.fromEntity(photo);
     }
 
+    @Transactional
     public List<PhotoResponse> batchUpdatePhotos(BatchPhotoUpdateRequest req) {
 
         List<Photo> photos = photoRepository.findAllById(req.photoIds());
+        if (photos.size() != req.photoIds().size()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "One or more photo IDs not found");
+        }
+
+        Show show = null;
+        if (req.showId().isPresent()) {
+            Long showId = req.showId().orElse(null);
+            if (showId != null) {
+                show = showRepository.findById(showId)
+                        .orElseThrow(
+                                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Show not found: " + showId));
+            }
+        }
 
         for (Photo p : photos) {
 
@@ -259,19 +275,12 @@ public class PhotoService {
 
             // showId
             if (req.showId().isPresent()) {
-                Long id = req.showId().orElse(null);
-                if (id == null) {
-                    p.setShow(null);
-                } else {
-                    Show s = showRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("Show not found: " + id));
-                    p.setShow(s);
-                }
+                p.setShow(show);
             }
         }
 
         photoRepository.saveAll(photos);
-        
+
         return photos.stream().map(PhotoResponse::fromEntity).collect(Collectors.toList());
     }
 }
