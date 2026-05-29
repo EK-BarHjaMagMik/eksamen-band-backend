@@ -33,6 +33,12 @@ public class Photo {
     @Column(nullable = false, length = 2048)
     private String url;
 
+    @Column(length = 2048)
+    private String optimizedUrl;
+
+    @Column(length = 2048)
+    private String thumbnailUrl;
+
     private String caption;
 
     @Column(nullable = false)
