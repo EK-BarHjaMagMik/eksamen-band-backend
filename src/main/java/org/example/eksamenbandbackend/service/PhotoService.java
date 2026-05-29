@@ -1,11 +1,11 @@
 package org.example.eksamenbandbackend.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +26,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PhotoService {
@@ -248,7 +247,7 @@ public class PhotoService {
                 .toList();
 
         List<Photo> photos = photoRepository.findAllById(photoIds);
-        if (photos.size() != photoIds.size()) {
+        if (photos.size() != photoIds.stream().distinct().count()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more photo IDs not found");
         }
 
@@ -273,7 +272,14 @@ public class PhotoService {
 
             if (payload.containsKey("dateTaken")) {
                 Object raw = payload.get("dateTaken");
-                LocalDate date = raw != null ? LocalDate.parse(raw.toString()) : null;
+                LocalDate date = null;
+                if (raw != null) {
+                    try {
+                        date = LocalDate.parse(raw.toString());
+                    } catch (java.time.format.DateTimeParseException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid dateTaken: " + raw);
+                    }
+                }
                 p.setDateTaken(date);
             }
 
