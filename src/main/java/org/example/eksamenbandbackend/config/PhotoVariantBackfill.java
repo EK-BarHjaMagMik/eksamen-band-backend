@@ -58,7 +58,7 @@ public class PhotoVariantBackfill implements CommandLineRunner {
 
         for (Photo photo : needsBackfill) {
             Path original = resolveUploadPath(photo.getUrl());
-            if (original == null || !Files.exists(original)) {
+            if (!Files.exists(original)) {
                 System.err.println("Skipping photo " + photo.getId()
                         + " — original file missing on disk: " + photo.getUrl());
                 skipped++;
@@ -86,8 +86,12 @@ public class PhotoVariantBackfill implements CommandLineRunner {
     }
 
     private Path resolveUploadPath(String url) {
-        if (url == null || !url.startsWith("/uploads/")) return null;
-        String relative = url.substring("/uploads/".length());
+        // Photo.url is @Column(nullable=false), so we never need to handle null.
+        // Strip the /uploads/ prefix when present; otherwise resolve as-is and
+        // let the caller's Files.exists() check catch malformed paths.
+        String relative = url.startsWith("/uploads/")
+                ? url.substring("/uploads/".length())
+                : url;
         return Paths.get(uploadDir.trim()).resolve(relative);
     }
 }
