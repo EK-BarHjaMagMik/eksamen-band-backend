@@ -119,11 +119,15 @@ public class BandMemberService {
         Path dir = Paths.get(uploadDir.trim()).resolve(MEMBER_PHOTO_SUBDIR);
         Files.createDirectories(dir);
 
-        String originalFilename = file.getOriginalFilename();
-        String fileExt = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            fileExt = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
+        // Derive the extension from the already-validated content type
+        // (uploadBandMemberPhoto rejects anything outside ALLOWED_TYPES).
+        // Avoids user-controlled originalFilename flowing into the path.
+        String fileExt = switch (file.getContentType()) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            default -> "";
+        };
 
         String filename = UUID.randomUUID() + fileExt;
         Path targetPath = dir.resolve(filename);
