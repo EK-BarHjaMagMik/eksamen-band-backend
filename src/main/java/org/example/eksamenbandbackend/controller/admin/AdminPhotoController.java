@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.example.eksamenbandbackend.dto.UpdatePhotoRequest;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 
@@ -55,6 +55,13 @@ public class AdminPhotoController {
     
     @PatchMapping
     public ResponseEntity<List<PhotoResponse>> batchUpdatePhotos(@RequestBody Map<String, Object> payload) {
+        // Basic validation: require non-empty photoIds list so controller returns 400 on invalid body
+        if (payload == null || !payload.containsKey("photoIds") || !(payload.get("photoIds") instanceof List<?> raw)
+                || raw.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "photoIds must be a non-empty list");
+        }
+
         return new ResponseEntity<>(photoService.batchUpdatePhotos(payload), HttpStatus.OK);
     }
 

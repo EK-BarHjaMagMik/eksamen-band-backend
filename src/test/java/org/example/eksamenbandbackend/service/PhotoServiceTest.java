@@ -1,6 +1,7 @@
 package org.example.eksamenbandbackend.service;
 
-import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
+import java.util.HashMap;
+import java.util.Map;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.example.eksamenbandbackend.entity.Photo;
 import org.example.eksamenbandbackend.entity.Show;
@@ -24,7 +25,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -57,15 +57,11 @@ class PhotoServiceTest {
         p2.setUrl("/uploads/2.jpg");
         p2.setCaption("old2");
 
-        when(photoRepository.findAllById(Set.of(1L, 2L))).thenReturn(List.of(p1, p2));
+        when(photoRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(p1, p2));
 
-        BatchPhotoUpdateRequest req = new BatchPhotoUpdateRequest(
-                Set.of(1L, 2L),
-                Optional.of("New caption"),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty()
-        );
+        Map<String, Object> req = new HashMap<>();
+        req.put("photoIds", List.of(1, 2));
+        req.put("caption", "New caption");
 
         List<PhotoResponse> resp = photoService.batchUpdatePhotos(req);
 
@@ -76,15 +72,9 @@ class PhotoServiceTest {
 
     @Test
     void batchUpdatePhotos_throwsWhenPhotoIdMissing() {
-        when(photoRepository.findAllById(Set.of(99L))).thenReturn(List.of());
-
-        BatchPhotoUpdateRequest req = new BatchPhotoUpdateRequest(
-                Set.of(99L),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty()
-        );
+        when(photoRepository.findAllById(List.of(99L))).thenReturn(List.of());
+        Map<String, Object> req = new HashMap<>();
+        req.put("photoIds", List.of(99));
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> photoService.batchUpdatePhotos(req));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
@@ -95,16 +85,12 @@ class PhotoServiceTest {
         Photo p1 = new Photo();
         p1.setId(1L);
 
-        when(photoRepository.findAllById(Set.of(1L))).thenReturn(List.of(p1));
+        when(photoRepository.findAllById(List.of(1L))).thenReturn(List.of(p1));
         when(showRepository.findById(5L)).thenReturn(Optional.empty());
 
-        BatchPhotoUpdateRequest req = new BatchPhotoUpdateRequest(
-                Set.of(1L),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.of(5L)
-        );
+        Map<String, Object> req = new HashMap<>();
+        req.put("photoIds", List.of(1));
+        req.put("showId", 5L);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> photoService.batchUpdatePhotos(req));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());

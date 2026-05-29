@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
 import org.example.eksamenbandbackend.dto.UpdatePhotoRequest;
 import org.example.eksamenbandbackend.dto.UploadPhotosResponse;
