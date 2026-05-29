@@ -58,8 +58,7 @@ class AdminBandMemberControllerTest {
                         {
                           "name": "Kasper",
                           "role": "Vocals",
-                          "bio": "Updated bio.",
-                          "photoUrl": "/uploads/members/abc.jpg"
+                          "bio": "Updated bio."
                         }
                         """))
                 .andExpect(status().isOk())
@@ -76,7 +75,6 @@ class AdminBandMemberControllerTest {
         assertThat(captured.name()).isEqualTo("Kasper");
         assertThat(captured.role()).isEqualTo("Vocals");
         assertThat(captured.bio()).isEqualTo("Updated bio.");
-        assertThat(captured.photoUrl()).isEqualTo("/uploads/members/abc.jpg");
     }
 
     @Test
@@ -88,8 +86,7 @@ class AdminBandMemberControllerTest {
                         {
                           "name": "Kasper",
                           "role": "Vocals",
-                          "bio": "   ",
-                          "photoUrl": null
+                          "bio": "   "
                         }
                         """))
                 .andExpect(status().isBadRequest());
@@ -110,8 +107,7 @@ class AdminBandMemberControllerTest {
                         {
                           "name": "Ghost",
                           "role": "Vocals",
-                          "bio": "Not real.",
-                          "photoUrl": null
+                          "bio": "Not real."
                         }
                         """))
                 .andExpect(status().isNotFound());

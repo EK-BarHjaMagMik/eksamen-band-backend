@@ -39,7 +39,7 @@ class ImageProcessingServiceTest {
     }
 
     @Test
-    void shouldGenerateThumbnailWebp300pxWide(@TempDir Path tempDir) throws IOException {
+    void shouldGenerateThumbnailWebp600pxWide(@TempDir Path tempDir) throws IOException {
         Path source = createTestImage(tempDir);
 
         Path thumbnail = service.generateThumbnail(source);

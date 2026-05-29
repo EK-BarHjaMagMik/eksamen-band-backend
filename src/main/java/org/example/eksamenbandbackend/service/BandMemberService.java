@@ -61,7 +61,7 @@ public class BandMemberService {
                     bandMember.setName(request.name());
                     bandMember.setRole(request.role());
                     bandMember.setBio(request.bio());
-                    bandMember.setPhotoUrl(request.photoUrl());
+                    // photoUrl is server-controlled — set only via uploadBandMemberPhoto().
                     return BandMemberResponse.fromEntity(bandMemberRepository.save(bandMember));
                 })
                 .orElseThrow(
