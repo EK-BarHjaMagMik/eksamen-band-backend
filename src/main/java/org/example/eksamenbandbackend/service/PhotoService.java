@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -237,50 +238,58 @@ public class PhotoService {
     }
 
     @Transactional
-    public List<PhotoResponse> batchUpdatePhotos(BatchPhotoUpdateRequest req) {
+    public List<PhotoResponse> batchUpdatePhotos(Map<String, Object> payload) {
 
-        List<Photo> photos = photoRepository.findAllById(req.photoIds());
-        if (photos.size() != req.photoIds().size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "One or more photo IDs not found");
+        // photoIds
+        Object ids = payload.get("photoIds");
+        if (!(ids instanceof List<?> rawList) || rawList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "photoIds must be a non-empty list");
+        }
+        List<Long> photoIds = rawList.stream()
+                .map(o -> ((Number) o).longValue())
+                .toList();
+
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+        if (photos.size() != photoIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more photo IDs not found");
         }
 
+        // showId
         Show show = null;
-        if (req.showId().isPresent()) {
-            Long showId = req.showId().orElse(null);
+        if (payload.containsKey("showId")) {
+            Object raw = payload.get("showId");
+            Long showId = raw instanceof Number ? ((Number) raw).longValue() : null;
+
             if (showId != null) {
                 show = showRepository.findById(showId)
-                        .orElseThrow(
-                                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Show not found: " + showId));
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Show not found: " + showId));
             }
         }
 
         for (Photo p : photos) {
 
-            // caption
-            if (req.caption().isPresent()) {
-                p.setCaption(req.caption().orElse(null)); // null clears
+            if (payload.containsKey("caption")) {
+                p.setCaption((String) payload.get("caption"));
             }
 
-            // dateTaken
-            if (req.dateTaken().isPresent()) {
-                p.setDateTaken(req.dateTaken().orElse(null));
+            if (payload.containsKey("dateTaken")) {
+                Object raw = payload.get("dateTaken");
+                LocalDate date = raw != null ? LocalDate.parse(raw.toString()) : null;
+                p.setDateTaken(date);
             }
 
-            // photographer
-            if (req.photographer().isPresent()) {
-                p.setPhotographer(req.photographer().orElse(null));
+            if (payload.containsKey("photographer")) {
+                p.setPhotographer((String) payload.get("photographer"));
             }
 
-            // showId
-            if (req.showId().isPresent()) {
+            if (payload.containsKey("showId")) {
                 p.setShow(show);
             }
         }
 
         photoRepository.saveAll(photos);
-
-        return photos.stream().map(PhotoResponse::fromEntity).collect(Collectors.toList());
+        return photos.stream().map(PhotoResponse::fromEntity).toList();
     }
+
 }

@@ -2,6 +2,7 @@ package org.example.eksamenbandbackend.controller.admin;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.example.eksamenbandbackend.dto.BatchPhotoUpdateRequest;
 import org.example.eksamenbandbackend.dto.PhotoResponse;
@@ -53,8 +54,8 @@ public class AdminPhotoController {
     }
     
     @PatchMapping
-    public ResponseEntity<List<PhotoResponse>> batchUpdatePhotos(@Valid @RequestBody BatchPhotoUpdateRequest req) {
-        return new ResponseEntity<>(photoService.batchUpdatePhotos(req), HttpStatus.OK);
+    public ResponseEntity<List<PhotoResponse>> batchUpdatePhotos(@RequestBody Map<String, Object> payload) {
+        return new ResponseEntity<>(photoService.batchUpdatePhotos(payload), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
