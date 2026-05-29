@@ -32,102 +32,101 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AdminBandMemberController.class)
 class AdminBandMemberControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private BandMemberService bandMemberService;
+        @MockitoBean
+        private BandMemberService bandMemberService;
 
-    @MockitoBean
-    private JwtUtil jwtUtil;
+        @MockitoBean
+        private JwtUtil jwtUtil;
 
-    @MockitoBean
-    private UserDetailsService userDetailsService;
+        @MockitoBean
+        private UserDetailsService userDetailsService;
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldUpdateBandMemberTextFields() throws Exception {
-        BandMemberResponse response = new BandMemberResponse(
-                1L, "Kasper", "Vocals", "Updated bio.", "/uploads/members/abc.jpg");
-        when(bandMemberService.editBandMemberById(eq(1L), any(UpdateBandMemberRequest.class)))
-                .thenReturn(response);
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldUpdateBandMemberTextFields() throws Exception {
+                BandMemberResponse response = new BandMemberResponse(
+                                1L, "Kasper", "Vocals", "Updated bio.", "/uploads/members/abc.jpg");
+                when(bandMemberService.editBandMemberById(eq(1L), any(UpdateBandMemberRequest.class)))
+                                .thenReturn(response);
 
-        mockMvc.perform(put("/api/admin/band-members/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                          "name": "Kasper",
-                          "role": "Vocals",
-                          "bio": "Updated bio."
-                        }
-                        """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Kasper"))
-                .andExpect(jsonPath("$.role").value("Vocals"))
-                .andExpect(jsonPath("$.bio").value("Updated bio."))
-                .andExpect(jsonPath("$.photoUrl").value("/uploads/members/abc.jpg"));
+                mockMvc.perform(put("/api/admin/band-members/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                        "name": "Kasper",
+                                                        "role": "Vocals",
+                                                        "bio": "Updated bio."
+                                                }
+                                                """))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.name").value("Kasper"))
+                                .andExpect(jsonPath("$.role").value("Vocals"))
+                                .andExpect(jsonPath("$.bio").value("Updated bio."))
+                                .andExpect(jsonPath("$.photoUrl").value("/uploads/members/abc.jpg"));
 
-        ArgumentCaptor<UpdateBandMemberRequest> captor =
-                ArgumentCaptor.forClass(UpdateBandMemberRequest.class);
-        verify(bandMemberService).editBandMemberById(eq(1L), captor.capture());
+                ArgumentCaptor<UpdateBandMemberRequest> captor = ArgumentCaptor.forClass(UpdateBandMemberRequest.class);
+                verify(bandMemberService).editBandMemberById(eq(1L), captor.capture());
 
-        UpdateBandMemberRequest captured = captor.getValue();
-        assertThat(captured.name()).isEqualTo("Kasper");
-        assertThat(captured.role()).isEqualTo("Vocals");
-        assertThat(captured.bio()).isEqualTo("Updated bio.");
-    }
+                UpdateBandMemberRequest captured = captor.getValue();
+                assertThat(captured.name()).isEqualTo("Kasper");
+                assertThat(captured.role()).isEqualTo("Vocals");
+                assertThat(captured.bio()).isEqualTo("Updated bio.");
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldRejectBlankBioWith400() throws Exception {
-        mockMvc.perform(put("/api/admin/band-members/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                          "name": "Kasper",
-                          "role": "Vocals",
-                          "bio": "   "
-                        }
-                        """))
-                .andExpect(status().isBadRequest());
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldRejectBlankBioWith400() throws Exception {
+                mockMvc.perform(put("/api/admin/band-members/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                        "name": "Kasper",
+                                                        "role": "Vocals",
+                                                        "bio": "   "
+                                                }
+                                                """))
+                                .andExpect(status().isBadRequest());
 
-        verify(bandMemberService, never())
-                .editBandMemberById(any(Long.class), any(UpdateBandMemberRequest.class));
-    }
+                verify(bandMemberService, never())
+                                .editBandMemberById(any(Long.class), any(UpdateBandMemberRequest.class));
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldReturn404WhenMemberNotFound() throws Exception {
-        when(bandMemberService.editBandMemberById(eq(999L), any(UpdateBandMemberRequest.class)))
-                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Band member not found"));
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldReturn404WhenMemberNotFound() throws Exception {
+                when(bandMemberService.editBandMemberById(eq(999L), any(UpdateBandMemberRequest.class)))
+                                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Band member not found"));
 
-        mockMvc.perform(put("/api/admin/band-members/999")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                          "name": "Ghost",
-                          "role": "Vocals",
-                          "bio": "Not real."
-                        }
-                        """))
-                .andExpect(status().isNotFound());
-    }
+                mockMvc.perform(put("/api/admin/band-members/999")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                        "name": "Ghost",
+                                                        "role": "Vocals",
+                                                        "bio": "Not real."
+                                                }
+                                                """))
+                                .andExpect(status().isNotFound());
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldUploadBandMemberPhoto() throws Exception {
-        BandMemberResponse response = new BandMemberResponse(
-                1L, "Kasper", "Vocals", "Bio.", "/uploads/members/new.jpg");
-        when(bandMemberService.uploadBandMemberPhoto(eq(1L), any(MultipartFile.class)))
-                .thenReturn(response);
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldUploadBandMemberPhoto() throws Exception {
+                BandMemberResponse response = new BandMemberResponse(
+                                1L, "Kasper", "Vocals", "Bio.", "/uploads/members/new.jpg");
+                when(bandMemberService.uploadBandMemberPhoto(eq(1L), any(MultipartFile.class)))
+                                .thenReturn(response);
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file", "photo.jpg", "image/jpeg", "img-bytes".getBytes());
+                MockMultipartFile file = new MockMultipartFile(
+                                "file", "photo.jpg", "image/jpeg", "img-bytes".getBytes());
 
-        mockMvc.perform(multipart("/api/admin/band-members/1/photo").file(file))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.photoUrl").value("/uploads/members/new.jpg"));
+                mockMvc.perform(multipart("/api/admin/band-members/1/photo").file(file))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.photoUrl").value("/uploads/members/new.jpg"));
 
-        verify(bandMemberService).uploadBandMemberPhoto(eq(1L), any(MultipartFile.class));
-    }
+                verify(bandMemberService).uploadBandMemberPhoto(eq(1L), any(MultipartFile.class));
+        }
 }

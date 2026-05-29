@@ -49,14 +49,12 @@ public class BandMemberService {
         return bandMemberRepository.findById(bandMemberId)
                 .map(BandMemberResponse::fromEntity)
                 .orElseThrow(
-                        () ->
-                                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                        "Band member not found with id: " + bandMemberId)
-                );
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Band member not found with id: " + bandMemberId));
     }
 
     public BandMemberResponse editBandMemberById(Long id, UpdateBandMemberRequest request) {
-        return bandMemberRepository.findById( id)
+        return bandMemberRepository.findById(id)
                 .map(bandMember -> {
                     bandMember.setName(request.name());
                     bandMember.setRole(request.role());
@@ -65,10 +63,8 @@ public class BandMemberService {
                     return BandMemberResponse.fromEntity(bandMemberRepository.save(bandMember));
                 })
                 .orElseThrow(
-                        () ->
-                                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                        "Band member not found with id: " + id)
-                );
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Band member not found with id: " + id));
     }
 
     public BandMemberResponse uploadBandMemberPhoto(Long id, MultipartFile file) {

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
@@ -295,7 +296,7 @@ public class InitData implements CommandLineRunner {
                 // DirectoryNotEmptyException on non-empty subdirs and the
                 // whole Spring context fails to start.
                 try (var s = Files.walk(dir)) {
-                    s.sorted(java.util.Comparator.reverseOrder())
+                    s.sorted(Comparator.reverseOrder())
                             .filter(p -> !p.equals(dir))
                             .forEach(p -> {
                                 try {
