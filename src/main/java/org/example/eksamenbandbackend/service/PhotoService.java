@@ -242,9 +242,14 @@ public class PhotoService {
         if (!(ids instanceof List<?> rawList) || rawList.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "photoIds must be a non-empty list");
         }
-        List<Long> photoIds = rawList.stream()
-                .map(o -> ((Number) o).longValue())
-                .toList();
+        List<Long> photoIds;
+        try {
+            photoIds = rawList.stream()
+                    .map(o -> ((Number) o).longValue())
+                    .toList();
+        } catch (ClassCastException | NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "photoIds must contain only numeric values");
+        }
 
         List<Photo> photos = photoRepository.findAllById(photoIds);
         if (photos.size() != photoIds.stream().distinct().count()) {
