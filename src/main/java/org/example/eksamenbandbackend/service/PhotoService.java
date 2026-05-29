@@ -1,13 +1,14 @@
 package org.example.eksamenbandbackend.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -25,10 +26,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PhotoService {
@@ -280,4 +280,72 @@ public class PhotoService {
 
         return PhotoResponse.fromEntity(photo);
     }
+
+    @Transactional
+    public List<PhotoResponse> batchUpdatePhotos(Map<String, Object> payload) {
+
+        // photoIds
+        Object ids = payload.get("photoIds");
+        if (!(ids instanceof List<?> rawList) || rawList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "photoIds must be a non-empty list");
+        }
+        List<Long> photoIds;
+        try {
+            photoIds = rawList.stream()
+                    .map(o -> ((Number) o).longValue())
+                    .toList();
+        } catch (ClassCastException | NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "photoIds must contain only numeric values");
+        }
+
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+        if (photos.size() != photoIds.stream().distinct().count()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more photo IDs not found");
+        }
+
+        // showId
+        Show show = null;
+        if (payload.containsKey("showId")) {
+            Object raw = payload.get("showId");
+            Long showId = raw instanceof Number ? ((Number) raw).longValue() : null;
+
+            if (showId != null) {
+                show = showRepository.findById(showId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Show not found: " + showId));
+            }
+        }
+
+        for (Photo p : photos) {
+
+            if (payload.containsKey("caption")) {
+                p.setCaption((String) payload.get("caption"));
+            }
+
+            if (payload.containsKey("dateTaken")) {
+                Object raw = payload.get("dateTaken");
+                LocalDate date = null;
+                if (raw != null) {
+                    try {
+                        date = LocalDate.parse(raw.toString());
+                    } catch (java.time.format.DateTimeParseException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid dateTaken: " + raw);
+                    }
+                }
+                p.setDateTaken(date);
+            }
+
+            if (payload.containsKey("photographer")) {
+                p.setPhotographer((String) payload.get("photographer"));
+            }
+
+            if (payload.containsKey("showId")) {
+                p.setShow(show);
+            }
+        }
+
+        photoRepository.saveAll(photos);
+        return photos.stream().map(PhotoResponse::fromEntity).toList();
+    }
+
 }
