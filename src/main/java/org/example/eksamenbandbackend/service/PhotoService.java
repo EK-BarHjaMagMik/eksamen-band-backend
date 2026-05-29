@@ -43,10 +43,14 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
     private final ShowRepository showRepository;
+    private final ImageProcessingService imageProcessingService;
 
-    public PhotoService(PhotoRepository photoRepository, ShowRepository showRepository) {
+    public PhotoService(PhotoRepository photoRepository,
+                        ShowRepository showRepository,
+                        ImageProcessingService imageProcessingService) {
         this.photoRepository = photoRepository;
         this.showRepository = showRepository;
+        this.imageProcessingService = imageProcessingService;
     }
 
     public List<PhotoResponse> getPhotos() {
@@ -113,13 +117,21 @@ public class PhotoService {
             }
 
             try {
-                // save file to disk
+                // save original file to disk
                 Path savedPath = saveFile(file);
                 String url = "/uploads/" + savedPath.getFileName();
+
+                // Generate WebP variants alongside the original. Best-effort —
+                // on failure the original alone is enough; the frontend falls
+                // back to it when optimized/thumbnail URLs are null.
+                Path optimizedPath = tryGenerate(savedPath, true);
+                Path thumbnailPath = tryGenerate(savedPath, false);
 
                 // Create DB entry
                 Photo photo = new Photo();
                 photo.setUrl(url);
+                if (optimizedPath != null) photo.setOptimizedUrl("/uploads/" + optimizedPath.getFileName());
+                if (thumbnailPath != null) photo.setThumbnailUrl("/uploads/" + thumbnailPath.getFileName());
                 photo.setCaption(caption);
                 photo.setPhotographer(photographer);
                 photo.setDateTaken(dateTaken != null ? dateTaken : LocalDate.now());
@@ -128,8 +140,10 @@ public class PhotoService {
                 try {
                     photoRepository.save(photo);
                 } catch (RuntimeException e) {
-                    // DB write failed — remove the orphaned file and keep the batch going
+                    // DB write failed — remove the orphaned files and keep the batch going
                     Files.deleteIfExists(savedPath);
+                    deleteQuietly(optimizedPath);
+                    deleteQuietly(thumbnailPath);
                     errors.add(new UploadError(file.getOriginalFilename(), "Failed to save photo"));
                     continue;
                 }
@@ -142,6 +156,26 @@ public class PhotoService {
         }
 
         return new UploadPhotosResponse(uploaded, errors);
+    }
+
+    private Path tryGenerate(Path source, boolean optimized) {
+        try {
+            return optimized
+                    ? imageProcessingService.generateOptimized(source)
+                    : imageProcessingService.generateThumbnail(source);
+        } catch (IOException | RuntimeException e) {
+            System.err.println("Image " + (optimized ? "optimization" : "thumbnail")
+                    + " failed for " + source + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static void deleteQuietly(Path path) {
+        if (path == null) return;
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ignored) {
+        }
     }
 
     private Path saveFile(MultipartFile file) throws IOException {
@@ -174,15 +208,28 @@ public class PhotoService {
         }
 
         Photo photo = optional.get();
-        String url = photo.getUrl();
 
         // 1. Delete DB record
         photoRepository.delete(photo);
 
-        // 2. Delete file from storage — a failure here leaves a harmless orphan file
-        deleteFileFromDisk(url);
+        // 2. Delete original file from storage (strict — 500s if it fails).
+        //    Derived variants are best-effort; an orphan webp file is harmless.
+        deleteFileFromDisk(photo.getUrl());
+        deleteDerivedFile(photo.getOptimizedUrl());
+        deleteDerivedFile(photo.getThumbnailUrl());
 
         return true;
+    }
+
+    private void deleteDerivedFile(String url) {
+        if (url == null || url.isEmpty()) return;
+        String filename = Paths.get(url).getFileName().toString();
+        Path filePath = Paths.get(uploadDir.trim()).resolve(filename);
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            System.err.println("Failed to delete derived photo file: " + filePath + " - " + e.getMessage());
+        }
     }
 
     private void deleteFileFromDisk(String url) {

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.example.eksamenbandbackend.dto.CreateUserRequest;
@@ -289,14 +290,21 @@ public class InitData implements CommandLineRunner {
         try {
             Path dir = Paths.get(System.getProperty("user.dir")).resolve(uploadDir);
             if (Files.exists(dir)) {
-                try (var s = Files.list(dir)) {
-                    s.forEach(p -> {
-                        try {
-                            Files.deleteIfExists(p);
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to delete upload file: " + p, e);
-                        }
-                    });
+                // Walk the tree depth-first so files inside subdirectories
+                // (e.g. uploads/members/) are removed before the directory
+                // itself — without this, Files.deleteIfExists throws
+                // DirectoryNotEmptyException on non-empty subdirs and the
+                // whole Spring context fails to start.
+                try (var s = Files.walk(dir)) {
+                    s.sorted(Comparator.reverseOrder())
+                            .filter(p -> !p.equals(dir))
+                            .forEach(p -> {
+                                try {
+                                    Files.deleteIfExists(p);
+                                } catch (IOException e) {
+                                    throw new RuntimeException("Failed to delete upload file: " + p, e);
+                                }
+                            });
                 }
             } else {
                 Files.createDirectories(dir);
